@@ -1,3 +1,24 @@
+/*
+# en-US: Index for Factura Electronica App
+This JavaScript file contains the functions that run on the client machine.
+It is organized into two main sections: One for functions, another for triggers
+1. Functions
+1.1
+1.2
+2. Triggers
+2.1
+2.2
+2.3
+2.4
+
+# es-GT: Indice para Aplicacion Factura Electronica
+Este archivo JavaScript contiene las funciones que corren en la máquina del cliente
+*/
+
+/*	1 en-US: Functions BEGIN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+/*	1.1 en-US: Tax Calculation Conversions BEGIN -------------------------------------*/
+/*	1.1 es-GT: Calculos y Conversiones de impuestos EMPIEZA --------------------------*/
 // Funcion para los calculos necesarios.
 function facelec_tax_calculation_conversion(frm, cdt, cdn) {
     // es-GT: Actualiza los datos en los campos de la tabla hija 'items'
@@ -93,7 +114,11 @@ function facelec_tax_calculation_conversion(frm, cdt, cdn) {
         };
     });
 }
+/*	1.1 en-US: Tax Calculation Conversions END ---------------------------------------*/
+/*	1.1 es-GT: Calculos y Conversiones de impuestos TERMINA --------------------------*/
 
+/*	1.2 en-US: Search Tax Account BEGIN ----------------------------------------------*/
+/*	1.2 es-GT: Busqueda de Cuenta de Impuestos EMPIEZA -------------------------------*/
 // Funcion para evitar realizar calculos con cuentas duplicadas
 function buscar_account(frm, cuenta_b) {
     /* Funcionamiento: recibe como parametro frm, y cuenta_b, lo que hace es, buscar en todas las filas de taxes
@@ -111,7 +136,11 @@ function buscar_account(frm, cuenta_b) {
     });
     return estado;
 }
+/*	1.2 en-US: Search Tax Account END ------------------------------------------------*/
+/*	1.2 es-GT: Busqueda de Cuenta de Impuestos TERMINA -------------------------------*/
 
+/*	1.3 en-US: Validate Tax ID (NIT) BEGIN -------------------------------------------*/
+/*	1.3 es-GT: Validar NIT EMPIEZA ---------------------------------------------------*/
 // Funcion para validar el NIT
 function valNit(nit, cus_supp, frm) { // cus_supp = customer or supplier
     if (nit === "C/F" || nit === "c/f") {
@@ -137,7 +166,11 @@ function valNit(nit, cus_supp, frm) { // cus_supp = customer or supplier
         }
     }
 }
+/*	1.3 en-US: Validate Tax ID (NIT) END ---------------------------------------------*/
+/*	1.3 es-GT: Validar NIT TERMINA ---------------------------------------------------*/
 
+/*	1.4 en-US: Obtain Electronic Invoice PDF BEGIN -----------------------------------*/
+/*	1.4 es-GT: Obtener PDF de Factura Electronica EMPIEZA ----------------------------*/
 // Funcion para la obtencion del PDF, segun el documento generado.
 function pdf_button(cae_documento, frm) {
     // Esta funcion se encarga de mostrar el boton para obtener el pdf de la factura electronica generada
@@ -146,7 +179,11 @@ function pdf_button(cae_documento, frm) {
             window.open("https://www.ingface.net/Ingfacereport/dtefactura.jsp?cae=" + cae_documento);
         }).addClass("btn-primary");
 }
+/*	1.4 en-US: Obtain Electronic Invoice PDF END -------------------------------------*/
+/*	1.4 es-GT: Obtener PDF de Factura Electronica TERMINA ----------------------------*/
 
+/*	1.5 en-US: Generate Electronic Invoice Manually with Button Press BEGIN ----------*/
+/*	1.5 es-GT: Genera la Factura Electronica Manualmente presionando el Botón EMPIEZA */
 // Funcion que incluye el boton para generar la factura electronica, esta se activa
 // cuando en la configuracion de factura electronica se encuentra en MANUAL
 function generarFacturaBTN(frm, cdt, cdn) {
@@ -253,7 +290,11 @@ function generarFacturaBTN(frm, cdt, cdn) {
         }
     }
 }
+/*	1.5 en-US: Generate Electronic Invoice Manually with Button Press END ------------*/
+/*	1.5 es-GT: Genera la Factura Electronica Manualmente presionando el Botón TERMINA */
 
+/*	1.6 en-US: Generate Electronic Invoice Automatically BEGIN -----------------------*/
+/*	1.6 es-GT: Genera la Factura Electronica Automaticamente EMPIEZA -----------------*/
 // Funcion sin boton para generar factura electronica, esta se activa cuando la configuracion de factura
 // electronica se encuentra en AUTOMATICA. Permite generar facturas electronicas despues de validar.
 function generarFacturaSINBTN(frm, cdt, cdn) {
@@ -353,7 +394,11 @@ function generarFacturaSINBTN(frm, cdt, cdn) {
         }
     }
 }
+/*	1.6 en-US: Generate Electronic Invoice Automatically END -------------------------*/
+/*	1.6 es-GT: Genera la Factura Electronica Automaticamente TERMINA -----------------*/
 
+/*	1.7 en-US: Generate Electronic Invoice if CAE not present BEGIN ------------------*/
+/*	1.7 es-GT: Genera la Factura Electronica si no encuentra CAE EMPIEZA -------------*/
 // Funcion verifica que se haya generado el CAE, para el documento requerido, en caso no se haya
 // generado mostrara un boton para hacerlo manualmente.
 function verificacionCAE(frm, cdt, cdn) {
@@ -400,9 +445,9 @@ function verificacionCAE(frm, cdt, cdn) {
             }
         }
     }
-    /* -------------------------------------------------------------------------------------- */
 }
-
+/*	1.7 en-US: Generate Electronic Invoice if CAE not present END --------------------*/
+/*	1.7 es-GT: Genera la Factura Electronica si no encuentra CAE TERMINA -------------*/
 frappe.ui.form.on("Sales Invoice", {
     refresh: function (frm, cdt, cdn) {
         // Trigger refresh de pagina
