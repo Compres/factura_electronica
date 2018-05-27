@@ -68,11 +68,17 @@
 /*	1.11 en-US: Tax Calculation Conversions for Purchase Receipt END -----------------*/
 /*	1.11 es-GT: Calculos y Conversiones para Recibo de Compra TERMINA ----------------*/
 
-/*	1.12 en-US: Tax Calculation Conversions for Purchase Receipt BEGIN ---------------*/
-/*	1.12 es-GT: Calculos y Conversiones para Recibo de Compra EMPIEZA ----------------*/
+/*	1.12 en-US: Tax Calculation Conversions for Sales Order BEGIN --------------------*/
+/*	1.12 es-GT: Calculos y Conversiones para Orden de Venta EMPIEZA ------------------*/
 
-/*	1.12 en-US: Tax Calculation Conversions for Purchase Receipt END -----------------*/
-/*	1.12 es-GT: Calculos y Conversiones para Recibo de Compra TERMINA ----------------*/
+/*	1.12 en-US: Tax Calculation Conversions for Sales Order END ----------------------*/
+/*	1.12 es-GT: Calculos y Conversiones para Orden de Venta TERMINA ------------------*/
+
+/*	1.13 en-US: Tax Calculation Conversions for Delivery Note BEGIN ------------------*/
+/*	1.13 es-GT: Calculos y Conversiones para Nota de Entrega EMPIEZA -----------------*/
+
+/*	1.13 en-US: Tax Calculation Conversions for Delivery Note END --------------------*/
+/*	1.13 es-GT: Calculos y Conversiones para Nota de Entrega TERMINA -----------------*/
 
 /*	2.1 en-US: Triggers for Sales Invoice BEGIN --------------------------------------*/
 /*	2.1 es-GT: Disparadores para Factura de Venta EMPIEZAN  --------------------------*/

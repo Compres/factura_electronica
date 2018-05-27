@@ -784,6 +784,156 @@ function shs_purchase_receipt_calculation(frm, cdt, cdn) {
 /*	1.11 en-US: Tax Calculation Conversions for Purchase Receipt END -----------------*/
 /*	1.11 es-GT: Calculos y Conversiones para Recibo de Compra TERMINA ----------------*/
 
+/*	1.12 en-US: Tax Calculation Conversions for Sales Order BEGIN --------------------*/
+/*	1.12 es-GT: Calculos y Conversiones para Orden de Venta EMPIEZA ------------------*/
+// Codigo Adaptado para Sales Order (Orden de Venta) 
+// Funcion para calculo de impuestos
+function shs_sales_order_calculation(frm, cdt, cdn) {
+
+    refresh_field('items');
+
+    let this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
+
+    let this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
+
+    frm.doc.items.forEach((item_row, index) => {
+        if (item_row.name === cdn) {
+            this_row_amount = (item_row.qty * item_row.rate);
+            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
+            this_row_tax_rate = (item_row.shs_so_tax_rate_per_uom);
+            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
+            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
+            // Convert a number into a string, keeping only two decimals:
+            frm.doc.items[index].shs_so_other_tax_amount = ((item_row.shs_so_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
+            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
+            frm.doc.items[index].shs_so_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.shs_so_tax_rate_per_uom));
+            console.log("uom that just changed is: " + item_row.uom);
+            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            console.log("conversion_factor is: " + item_row.conversion_factor);
+            if (item_row.shs_so_is_fuel === 1) {
+                frm.doc.items[index].shs_so_gt_tax_net_fuel_amt = (item_row.shs_so_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].shs_so_sales_tax_for_this_row = (item_row.shs_so_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check combustibles
+                let total_fuel = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    // total_qty += flt(d.qty);
+                    if (d.shs_so_is_fuel === 1) {
+                        total_fuel += flt(d.shs_so_gt_tax_net_fuel_amt);
+                    };
+                });
+                frm.doc.shs_gt_tax_fuel = total_fuel;
+                //frm.refresh_field("factelec_p_is_fuel");
+            };
+            if (item_row.shs_so_is_good === 1) {
+                frm.doc.items[index].shs_so_gt_tax_net_goods_amt = (item_row.shs_so_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].shs_so_sales_tax_for_this_row = (item_row.shs_so_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check bienes
+                let total_goods = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.shs_so_is_good === 1) {
+                        total_goods += flt(d.shs_so_gt_tax_net_goods_amt);
+                    };
+                });
+                frm.doc.shs_so_gt_tax_goods = total_goods;
+            };
+            if (item_row.shs_so_is_service === 1) {
+                frm.doc.items[index].shs_so_gt_tax_net_services_amt = (item_row.shs_so_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].shs_so_sales_tax_for_this_row = (item_row.shs_so_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check servicios
+                let total_servi = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.shs_so_is_service === 1) {
+                        total_servi += flt(d.shs_so_gt_tax_net_services_amt);
+                    };
+                });
+                frm.doc.shs_so_gt_tax_services = total_servi;
+            };
+            let full_tax_iva = 0;
+            $.each(frm.doc.items || [], function (i, d) {
+                full_tax_iva += flt(d.shs_so_sales_tax_for_this_row);
+            });
+            frm.doc.shs_so_total_iva = full_tax_iva;
+        };
+    });
+}
+/*	1.12 en-US: Tax Calculation Conversions for Sales Order END ----------------------*/
+/*	1.12 es-GT: Calculos y Conversiones para Orden de Venta TERMINA ------------------*/
+
+/*	1.13 en-US: Tax Calculation Conversions for Delivery Note BEGIN ------------------*/
+/*	1.13 es-GT: Calculos y Conversiones para Nota de Entrega EMPIEZA -----------------*/
+// Codigo Adaptado para Delivery Note (Nota de entrega)
+// Funcion para calculo de impuestos
+function shs_delivery_note_calculation(frm, cdt, cdn) {
+
+    refresh_field('items');
+
+    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
+
+    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
+
+    frm.doc.items.forEach((item_row, index) => {
+        if (item_row.name == cdn) {
+            this_row_amount = (item_row.qty * item_row.rate);
+            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
+            this_row_tax_rate = (item_row.shs_dn_tax_rate_per_uom);
+            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
+            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
+            // Convert a number into a string, keeping only two decimals:
+            frm.doc.items[index].shs_dn_other_tax_amount = ((item_row.shs_dn_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
+            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
+            frm.doc.items[index].shs_dn_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.shs_dn_tax_rate_per_uom));
+            console.log("uom that just changed is: " + item_row.uom);
+            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            console.log("conversion_factor is: " + item_row.conversion_factor);
+            if (item_row.shs_dn_is_fuel == 1) {
+                frm.doc.items[index].shs_dn_gt_tax_net_fuel_amt = (item_row.shs_dn_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].shs_dn_sales_tax_for_this_row = (item_row.shs_dn_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check combustibles
+                total_fuel = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    // total_qty += flt(d.qty);
+                    if (d.shs_dn_is_fuel == true) {
+                        total_fuel += flt(d.shs_dn_gt_tax_net_fuel_amt);
+                    };
+                });
+                frm.doc.shs_dn_gt_tax_fuel = total_fuel;
+                //frm.refresh_field("factelec_p_is_fuel");
+            };
+            if (item_row.shs_dn_is_good == 1) {
+                frm.doc.items[index].shs_dn_gt_tax_net_goods_amt = (item_row.shs_dn_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].shs_dn_sales_tax_for_this_row = (item_row.shs_dn_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check bienes
+                total_goods = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.shs_dn_is_good == true) {
+                        total_goods += flt(d.shs_dn_gt_tax_net_goods_amt);
+                    };
+                });
+                frm.doc.shs_dn_gt_tax_goods = total_goods;
+            };
+            if (item_row.shs_dn_is_service == 1) {
+                frm.doc.items[index].shs_dn_gt_tax_net_services_amt = (item_row.shs_dn_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].shs_dn_sales_tax_for_this_row = (item_row.shs_dn_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check servicios
+                total_servi = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.shs_dn_is_service == true) {
+                        total_servi += flt(d.shs_dn_gt_tax_net_services_amt);
+                    };
+                });
+                frm.doc.shs_dn_gt_tax_services = total_servi;
+            };
+            full_tax_iva = 0;
+            $.each(frm.doc.items || [], function (i, d) {
+                full_tax_iva += flt(d.shs_dn_sales_tax_for_this_row);
+            });
+            frm.doc.shs_dn_total_iva = full_tax_iva;
+        };
+    });
+}
+/*	1.13 en-US: Tax Calculation Conversions for Delivery Note END --------------------*/
+/*	1.13 es-GT: Calculos y Conversiones para Nota de Entrega TERMINA -----------------*/
+
 /*	1 en-US: Functions END <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 /*	1 es-GT: Funciones TERMINAN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
@@ -1447,6 +1597,8 @@ frappe.ui.form.on("Purchase Order Item", {
 /*	2.8 en-US: Triggers for Purchase Order Items END ---------------------------------*/
 /*	2.8 es-GT: Disparadores para Productos de Orden de Compra TERMINA ----------------*/
 
+/*	2.9 en-US: Triggers for Purchase Receipt BEGIN -----------------------------------*/
+/*	2.9 es-GT: Disparadores para Recibo de Compra EMPIEZA ----------------------------*/
 frappe.ui.form.on("Purchase Receipt", {
     refresh: function (frm, cdt, cdn) {
         // Trigger refresh de pagina
@@ -1501,7 +1653,11 @@ frappe.ui.form.on("Purchase Receipt", {
         });
     },
 });
+/*	2.9 en-US: Triggers for Purchase Receipt END -------------------------------------*/
+/*	2.9 es-GT: Disparadores para Recibo de Compra TERMINA ----------------------------*/
 
+/*	2.10 en-US: Triggers for Purchase Receipt Item BEGIN -----------------------------*/
+/*	2.10 es-GT: Disparadores para Productos de Recibo de Compra EMPIEZA --------------*/
 frappe.ui.form.on("Purchase Receipt Item", {
     items_add: function (frm, cdt, cdn) {},
     items_move: function (frm, cdt, cdn) {},
@@ -1590,78 +1746,11 @@ frappe.ui.form.on("Purchase Receipt Item", {
         shs_purchase_receipt_calculation(frm, cdt, cdn);
     }
 });
+/*	2.10 en-US: Triggers for Purchase Receipt Item END -------------------------------*/
+/*	2.10 es-GT: Disparadores para Productos de Recibo de Compra TERMINA --------------*/
 
-// Codigo Adaptado para Sales Order (Orden de Venta) 
-// Funcion para calculo de impuestos
-function shs_sales_order_calculation(frm, cdt, cdn) {
-
-    refresh_field('items');
-
-    let this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
-
-    let this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
-
-    frm.doc.items.forEach((item_row, index) => {
-        if (item_row.name === cdn) {
-            this_row_amount = (item_row.qty * item_row.rate);
-            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
-            this_row_tax_rate = (item_row.shs_so_tax_rate_per_uom);
-            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
-            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
-            // Convert a number into a string, keeping only two decimals:
-            frm.doc.items[index].shs_so_other_tax_amount = ((item_row.shs_so_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
-            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
-            frm.doc.items[index].shs_so_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.shs_so_tax_rate_per_uom));
-            console.log("uom that just changed is: " + item_row.uom);
-            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
-            console.log("conversion_factor is: " + item_row.conversion_factor);
-            if (item_row.shs_so_is_fuel === 1) {
-                frm.doc.items[index].shs_so_gt_tax_net_fuel_amt = (item_row.shs_so_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].shs_so_sales_tax_for_this_row = (item_row.shs_so_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check combustibles
-                let total_fuel = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    // total_qty += flt(d.qty);
-                    if (d.shs_so_is_fuel === 1) {
-                        total_fuel += flt(d.shs_so_gt_tax_net_fuel_amt);
-                    };
-                });
-                frm.doc.shs_gt_tax_fuel = total_fuel;
-                //frm.refresh_field("factelec_p_is_fuel");
-            };
-            if (item_row.shs_so_is_good === 1) {
-                frm.doc.items[index].shs_so_gt_tax_net_goods_amt = (item_row.shs_so_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].shs_so_sales_tax_for_this_row = (item_row.shs_so_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check bienes
-                let total_goods = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.shs_so_is_good === 1) {
-                        total_goods += flt(d.shs_so_gt_tax_net_goods_amt);
-                    };
-                });
-                frm.doc.shs_so_gt_tax_goods = total_goods;
-            };
-            if (item_row.shs_so_is_service === 1) {
-                frm.doc.items[index].shs_so_gt_tax_net_services_amt = (item_row.shs_so_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].shs_so_sales_tax_for_this_row = (item_row.shs_so_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check servicios
-                let total_servi = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.shs_so_is_service === 1) {
-                        total_servi += flt(d.shs_so_gt_tax_net_services_amt);
-                    };
-                });
-                frm.doc.shs_so_gt_tax_services = total_servi;
-            };
-            let full_tax_iva = 0;
-            $.each(frm.doc.items || [], function (i, d) {
-                full_tax_iva += flt(d.shs_so_sales_tax_for_this_row);
-            });
-            frm.doc.shs_so_total_iva = full_tax_iva;
-        };
-    });
-}
-
+/*	2.11 en-US: Triggers for Sales Order BEGIN ---------------------------------------*/
+/*	2.11 es-GT: Disparadores para Orden de Venta EMPIEZA -----------------------------*/
 frappe.ui.form.on("Sales Order", {
     refresh: function (frm, cdt, cdn) {
         // Trigger refresh de pagina
@@ -1716,7 +1805,11 @@ frappe.ui.form.on("Sales Order", {
         });
     },
 });
+/*	2.11 en-US: Triggers for Sales Order END -----------------------------------------*/
+/*	2.11 es-GT: Disparadores para Orden de Venta TERMINA -----------------------------*/
 
+/*	2.12 en-US: Triggers for Sales Order Item BEGIN ----------------------------------*/
+/*	2.12 es-GT: Disparadores para Productos de Orden de Venta EMPIEZA ----------------*/
 frappe.ui.form.on("Sales Order Item", {
     items_add: function (frm, cdt, cdn) {},
     items_move: function (frm, cdt, cdn) {},
@@ -1805,77 +1898,8 @@ frappe.ui.form.on("Sales Order Item", {
         shs_sales_order_calculation(frm, cdt, cdn);
     }
 });
-
-// Codigo Adaptado para Delivery Note (Nota de entrega)
-// Funcion para calculo de impuestos
-function shs_delivery_note_calculation(frm, cdt, cdn) {
-
-    refresh_field('items');
-
-    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
-
-    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
-
-    frm.doc.items.forEach((item_row, index) => {
-        if (item_row.name == cdn) {
-            this_row_amount = (item_row.qty * item_row.rate);
-            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
-            this_row_tax_rate = (item_row.shs_dn_tax_rate_per_uom);
-            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
-            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
-            // Convert a number into a string, keeping only two decimals:
-            frm.doc.items[index].shs_dn_other_tax_amount = ((item_row.shs_dn_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
-            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
-            frm.doc.items[index].shs_dn_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.shs_dn_tax_rate_per_uom));
-            console.log("uom that just changed is: " + item_row.uom);
-            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
-            console.log("conversion_factor is: " + item_row.conversion_factor);
-            if (item_row.shs_dn_is_fuel == 1) {
-                frm.doc.items[index].shs_dn_gt_tax_net_fuel_amt = (item_row.shs_dn_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].shs_dn_sales_tax_for_this_row = (item_row.shs_dn_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check combustibles
-                total_fuel = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    // total_qty += flt(d.qty);
-                    if (d.shs_dn_is_fuel == true) {
-                        total_fuel += flt(d.shs_dn_gt_tax_net_fuel_amt);
-                    };
-                });
-                frm.doc.shs_dn_gt_tax_fuel = total_fuel;
-                //frm.refresh_field("factelec_p_is_fuel");
-            };
-            if (item_row.shs_dn_is_good == 1) {
-                frm.doc.items[index].shs_dn_gt_tax_net_goods_amt = (item_row.shs_dn_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].shs_dn_sales_tax_for_this_row = (item_row.shs_dn_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check bienes
-                total_goods = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.shs_dn_is_good == true) {
-                        total_goods += flt(d.shs_dn_gt_tax_net_goods_amt);
-                    };
-                });
-                frm.doc.shs_dn_gt_tax_goods = total_goods;
-            };
-            if (item_row.shs_dn_is_service == 1) {
-                frm.doc.items[index].shs_dn_gt_tax_net_services_amt = (item_row.shs_dn_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].shs_dn_sales_tax_for_this_row = (item_row.shs_dn_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check servicios
-                total_servi = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.shs_dn_is_service == true) {
-                        total_servi += flt(d.shs_dn_gt_tax_net_services_amt);
-                    };
-                });
-                frm.doc.shs_dn_gt_tax_services = total_servi;
-            };
-            full_tax_iva = 0;
-            $.each(frm.doc.items || [], function (i, d) {
-                full_tax_iva += flt(d.shs_dn_sales_tax_for_this_row);
-            });
-            frm.doc.shs_dn_total_iva = full_tax_iva;
-        };
-    });
-}
+/*	2.12 en-US: Triggers for Sales Order Item END ------------------------------------*/
+/*	2.12 es-GT: Disparadores para Productos de Orden de Venta TERMINA ----------------*/
 
 frappe.ui.form.on("Delivery Note", {
     refresh: function (frm, cdt, cdn) {
