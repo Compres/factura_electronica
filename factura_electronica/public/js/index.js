@@ -43,3 +43,60 @@
 
 /*	1.7 en-US: Generate Electronic Invoice if CAE not present END --------------------*/
 /*	1.7 es-GT: Genera la Factura Electronica si no encuentra CAE TERMINA -------------*/
+
+/*	1.8 en-US: Tax Calculation Conversions for Purchase Invoice BEGIN ----------------*/
+/*	1.8 es-GT: Calculos y Conversiones para Factura de Compra EMPIEZA ----------------*/
+
+/*	1.8 en-US: Tax Calculation Conversions for Purchase Invoice END ------------------*/
+/*	1.8 es-GT: Calculos y Conversiones para Factura de Compra TERMINA ----------------*/
+
+/*	1.9 en-US: Tax Calculation Conversions for Cotizacion de Compra BEGIN ------------*/
+/*	1.9 es-GT: Calculos y Conversiones para Cotizacion de Compra EMPIEZA -------------*/
+
+/*	1.9 en-US: Tax Calculation Conversions for Cotizacion de Compra END --------------*/
+/*	1.9 es-GT: Calculos y Conversiones para Cotizacion de Compra TERMINA -------------*/
+
+/*	1.10 en-US: Tax Calculation Conversions for Quotation Item BEGIN -----------------*/
+/*	1.10 es-GT: Calculos y Conversiones para Quotation Item EMPIEZA ------------------*/
+
+/*	1.10 en-US: Tax Calculation Conversions for Cotizacion de Compra END -------------*/
+/*	1.10 es-GT: Calculos y Conversiones para Cotizacion de Compra TERMINA ------------*/
+
+/*	1.11 en-US: Tax Calculation Conversions for Purchase Receipt BEGIN ---------------*/
+/*	1.11 es-GT: Calculos y Conversiones para Recibo de Compra EMPIEZA ----------------*/
+
+/*	1.11 en-US: Tax Calculation Conversions for Purchase Receipt END -----------------*/
+/*	1.11 es-GT: Calculos y Conversiones para Recibo de Compra TERMINA ----------------*/
+
+/*	1.12 en-US: Tax Calculation Conversions for Purchase Receipt BEGIN ---------------*/
+/*	1.12 es-GT: Calculos y Conversiones para Recibo de Compra EMPIEZA ----------------*/
+
+/*	1.12 en-US: Tax Calculation Conversions for Purchase Receipt END -----------------*/
+/*	1.12 es-GT: Calculos y Conversiones para Recibo de Compra TERMINA ----------------*/
+
+/*	2.1 en-US: Triggers for Sales Invoice BEGIN --------------------------------------*/
+/*	2.1 es-GT: Disparadores para Factura de Venta EMPIEZAN  --------------------------*/
+
+/*	2.1 en-US: Triggers for Sales Invoice END ----------------------------------------*/
+/*	2.1 es-GT: Disparadores para Factura de Venta TERMINAN  --------------------------*/
+
+/*	2.2 en-US: Triggers for Sales Invoice Items BEGIN --------------------------------*/
+/*	2.2 es-GT: Disparadores para Productos de Factura de Venta EMPIEZAN  -------------*/
+
+/*	2.2 en-US: Triggers for Sales Invoice Items END ----------------------------------*/
+/*	2.2 es-GT: Disparadores para Productos de Factura de Venta TERMINAN  -------------*/
+
+/*	2.3 en-US: Triggers for Purchase Invoice BEGIN -----------------------------------*/
+/*	2.3 es-GT: Disparadores para Factura de Compra EMPIEZAN  -------------------------*/
+
+/*	2.3 en-US: Triggers for Purchase Invoice END -------------------------------------*/
+/*	2.3 es-GT: Disparadores para Factura de Compra TERMINAN  -------------------------*/
+
+/*	2.4 en-US: Triggers for Purchase Invoice Items BEGIN -----------------------------*/
+/*	2.4 es-GT: Disparadores para Productos de Factura de Compra EMPIEZAN  ------------*/
+
+/*	2.4 en-US: Triggers for Purchase Invoice Items END -------------------------------*/
+/*	2.4 es-GT: Disparadores para Productos de Factura de Compra TERMINAN  ------------*/
+
+/*	2.8 en-US: Triggers for Purchase Order Items BEGIN -------------------------------*/
+/*	2.8 es-GT: Disparadores para Productos de Orden de Compra EMPIEZA ----------------*/

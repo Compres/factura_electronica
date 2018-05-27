@@ -3,8 +3,19 @@
 This JavaScript file contains the functions that run on the client machine.
 It is organized into two main sections: One for functions, another for triggers
 1. Functions
-1.1
-1.2
+1.1 en-US: Tax Calculation Conversions
+1.2 en-US: Search Tax Account
+1.3 en-US: Validate Tax ID (NIT)
+1.4 en-US: Obtain Electronic Invoice PDF
+1.5 en-US: Generate Electronic Invoice Manually with Button Press
+1.6 en-US: Generate Electronic Invoice Automatically
+1.7 en-US: Generate Electronic Invoice if CAE not present
+1.8 en-US: Tax Calculation Conversions for Purchase Invoice
+1.9 en-US: Tax Calculation Conversions for Cotizacion de Compra
+1.10 en-US: Tax Calculation Conversions for Quotation Item
+1.11 en-US: Tax Calculation Conversions for Purchase Receipt
+
+
 2. Triggers
 2.1
 2.2
@@ -13,9 +24,29 @@ It is organized into two main sections: One for functions, another for triggers
 
 # es-GT: Indice para Aplicacion Factura Electronica
 Este archivo JavaScript contiene las funciones que corren en la máquina del cliente
+Esta organizado en dos principales secciones: Una para funciones, otra para disparadores
+1. Funciones
+1.1 es-GT: Calculos y Conversiones de impuestos EMPIEZA
+1.2 es-GT: Busqueda de Cuenta de Impuestos
+1.3 es-GT: Validar NIT
+1.4 es-GT: Obtener PDF de Factura Electronica
+1.5 es-GT: Genera la Factura Electronica Manualmente presionando el Botón
+1.6 es-GT: Genera la Factura Electronica Automaticamente
+1.7 es-GT: Genera la Factura Electronica si no encuentra CAE
+1.8 es-GT: Calculos y Conversiones para Factura de Compra
+1.9 es-GT: Calculos y Conversiones para Cotizacion de Compra
+1.10 es-GT: Calculos y Conversiones para Quotation Item
+1.11 es-GT: Calculos y Conversiones para Recibo de Compra
+
+2. Disparadores
+2.1
+2.2
+2.3
+2.4
 */
 
 /*	1 en-US: Functions BEGIN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+/*	1 es-GT: Funciones EMPIEZAN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
 /*	1.1 en-US: Tax Calculation Conversions BEGIN -------------------------------------*/
 /*	1.1 es-GT: Calculos y Conversiones de impuestos EMPIEZA --------------------------*/
@@ -448,6 +479,319 @@ function verificacionCAE(frm, cdt, cdn) {
 }
 /*	1.7 en-US: Generate Electronic Invoice if CAE not present END --------------------*/
 /*	1.7 es-GT: Genera la Factura Electronica si no encuentra CAE TERMINA -------------*/
+
+/*	1.8 en-US: Tax Calculation Conversions for Purchase Invoice BEGIN ----------------*/
+/*	1.8 es-GT: Calculos y Conversiones para Factura de Compra EMPIEZA ----------------*/
+// Codigo Adaptado para Purchase Invoice (Factura de Compra) 
+// Funcion para calculo de impuestos
+function shs_purchase_invoice_calculation(frm, cdt, cdn) {
+
+    refresh_field('items');
+
+    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
+
+    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
+
+    frm.doc.items.forEach((item_row, index) => {
+        if (item_row.name == cdn) {
+            this_row_amount = (item_row.qty * item_row.rate);
+            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
+            this_row_tax_rate = (item_row.facelec_p_tax_rate_per_uom);
+            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
+            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
+            // Convert a number into a string, keeping only two decimals:
+            frm.doc.items[index].facelec_p_other_tax_amount = ((item_row.facelec_p_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
+            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
+            frm.doc.items[index].facelec_p_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_p_tax_rate_per_uom));
+            console.log("uom that just changed is: " + item_row.uom);
+            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            console.log("conversion_factor is: " + item_row.conversion_factor);
+            if (item_row.facelec_p_is_fuel == 1) {
+                frm.doc.items[index].facelec_p_gt_tax_net_fuel_amt = (item_row.facelec_p_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_p_sales_tax_for_this_row = (item_row.facelec_p_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check combustibles
+                total_fuel = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    // total_qty += flt(d.qty);
+                    if (d.facelec_p_is_fuel == true) {
+                        total_fuel += flt(d.facelec_p_gt_tax_net_fuel_amt);
+                    };
+                });
+                frm.doc.facelec_p_gt_tax_fuel = total_fuel;
+                //frm.refresh_field("factelec_p_is_fuel");
+            };
+            if (item_row.facelec_p_is_good == 1) {
+                frm.doc.items[index].facelec_p_gt_tax_net_goods_amt = (item_row.facelec_p_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_p_sales_tax_for_this_row = (item_row.facelec_p_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check bienes
+                total_goods = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.facelec_p_is_good == true) {
+                        total_goods += flt(d.facelec_p_gt_tax_net_goods_amt);
+                    };
+                });
+                frm.doc.facelec_p_gt_tax_goods = total_goods;
+            };
+            if (item_row.facelec_p_is_service == 1) {
+                frm.doc.items[index].facelec_p_gt_tax_net_services_amt = (item_row.facelec_p_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_p_sales_tax_for_this_row = (item_row.facelec_p_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check servicios
+                total_servi = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.facelec_p_is_service == true) {
+                        total_servi += flt(d.facelec_p_gt_tax_net_services_amt);
+                    };
+                });
+                frm.doc.facelec_p_gt_tax_services = total_servi;
+            };
+            full_tax_iva = 0;
+            $.each(frm.doc.items || [], function (i, d) {
+                full_tax_iva += flt(d.facelec_p_sales_tax_for_this_row);
+            });
+            frm.doc.facelec_p_total_iva = full_tax_iva;
+        };
+    });
+}
+/*	1.8 en-US: Tax Calculation Conversions for Purchase Invoice END ------------------*/
+/*	1.8 es-GT: Calculos y Conversiones para Factura de Compra TERMINA ----------------*/
+
+/*	1.9 en-US: Tax Calculation Conversions for Cotizacion de Compra BEGIN ------------*/
+/*	1.9 es-GT: Calculos y Conversiones para Cotizacion de Compra EMPIEZA -------------*/
+// Codigo Adaptado para Purchase Quotation (Cotizacion de compra)
+// Funcion para calculo de impuestos
+function shs_quotation_calculation(frm, cdt, cdn) {
+
+    refresh_field('items');
+
+    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
+
+    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
+
+    frm.doc.items.forEach((item_row, index) => {
+        if (item_row.name == cdn) {
+            this_row_amount = (item_row.qty * item_row.rate);
+            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
+            this_row_tax_rate = (item_row.facelec_qt_tax_rate_per_uom);
+            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
+            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
+            // Convert a number into a string, keeping only two decimals:
+            frm.doc.items[index].facelec_qt_other_tax_amount = ((item_row.facelec_qt_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
+            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
+            frm.doc.items[index].facelec_qt_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_qt_tax_rate_per_uom));
+            console.log("uom that just changed is: " + item_row.uom);
+            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            console.log("conversion_factor is: " + item_row.conversion_factor);
+            if (item_row.facelec_qt_is_fuel == 1) {
+                frm.doc.items[index].facelec_qt_gt_tax_net_fuel_amt = (item_row.facelec_qt_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_qt_sales_tax_for_this_row = (item_row.facelec_qt_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check combustibles
+                total_fuel = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    // total_qty += flt(d.qty);
+                    if (d.facelec_qt_is_fuel == true) {
+                        total_fuel += flt(d.facelec_qt_gt_tax_net_fuel_amt);
+                    };
+                });
+                frm.doc.facelec_qt_gt_tax_fuel = total_fuel;
+                //frm.refresh_field("factelec_p_is_fuel");
+            };
+            if (item_row.facelec_qt_is_good == 1) {
+                frm.doc.items[index].facelec_qt_gt_tax_net_goods_amt = (item_row.facelec_qt_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_qt_sales_tax_for_this_row = (item_row.facelec_qt_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check bienes
+                total_goods = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.facelec_qt_is_good == true) {
+                        total_goods += flt(d.facelec_qt_gt_tax_net_goods_amt);
+                    };
+                });
+                frm.doc.facelec_qt_gt_tax_goods = total_goods;
+            };
+            if (item_row.facelec_qt_is_service == 1) {
+                frm.doc.items[index].facelec_qt_gt_tax_net_services_amt = (item_row.facelec_qt_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_qt_sales_tax_for_this_row = (item_row.facelec_qt_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check servicios
+                total_servi = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.facelec_qt_is_service == true) {
+                        total_servi += flt(d.facelec_qt_gt_tax_net_services_amt);
+                    };
+                });
+                frm.doc.facelec_qt_gt_tax_services = total_servi;
+            };
+            full_tax_iva = 0;
+            $.each(frm.doc.items || [], function (i, d) {
+                full_tax_iva += flt(d.facelec_qt_sales_tax_for_this_row);
+            });
+            frm.doc.facelec_qt_total_iva = full_tax_iva;
+        };
+    });
+}
+/*	1.9 en-US: Tax Calculation Conversions for Cotizacion de Compra END --------------*/
+/*	1.9 es-GT: Calculos y Conversiones para Cotizacion de Compra TERMINA -------------*/
+
+/*	1.10 en-US: Tax Calculation Conversions for Quotation Item BEGIN -----------------*/
+/*	1.10 es-GT: Calculos y Conversiones para Quotation Item EMPIEZA ------------------*/
+// Codigo Adaptado para Purchase Order (Orden de compra)
+// Funcion para calculo de impuestos
+function shs_purchase_order_calculation(frm, cdt, cdn) {
+    // es-GT: Actualiza los campos de la tabla hija 'items'
+    refresh_field('items');
+    // es-GT: Asigna a la variable el valor rate de la tabla hija 'taxes' en la posicion 0
+    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
+
+    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
+    // es-GT: Funcion que permite realizar los calculos necesarios dependiendo de la linea en la que se este trabajando
+    frm.doc.items.forEach((item_row, index) => {
+        if (item_row.name == cdn) {
+            this_row_amount = (item_row.qty * item_row.rate);
+            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
+            this_row_tax_rate = (item_row.facelec_po_tax_rate_per_uom);
+            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
+            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
+            // Convert a number into a string, keeping only two decimals:
+            frm.doc.items[index].facelec_po_other_tax_amount = ((item_row.facelec_po_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
+            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
+            frm.doc.items[index].facelec_po_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_po_tax_rate_per_uom));
+            console.log("uom that just changed is: " + item_row.uom);
+            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            console.log("conversion_factor is: " + item_row.conversion_factor);
+            // es-GT: Verificacion de si esta seleccionado el check Combustible
+            if (item_row.facelec_po_is_fuel == 1) {
+                frm.doc.items[index].facelec_po_gt_tax_net_fuel_amt = (item_row.facelec_po_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_po_sales_tax_for_this_row = (item_row.facelec_po_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check combustibles
+                total_fuel = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    // total_qty += flt(d.qty);
+                    if (d.facelec_po_is_fuel == true) {
+                        total_fuel += flt(d.facelec_po_gt_tax_net_fuel_amt);
+                    };
+                });
+                frm.doc.facelec_po_gt_tax_fuel = total_fuel;
+                //frm.refresh_field("factelec_p_is_fuel");
+            };
+            // es-GT: Verificacion de si esta seleccionado el check Bienes
+            if (item_row.facelec_po_is_good == 1) {
+                frm.doc.items[index].facelec_po_gt_tax_net_goods_amt = (item_row.facelec_po_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_po_sales_tax_for_this_row = (item_row.facelec_po_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check bienes
+                total_goods = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.facelec_po_is_good == true) {
+                        total_goods += flt(d.facelec_po_gt_tax_net_goods_amt);
+                    };
+                });
+                frm.doc.facelec_po_gt_tax_goods = total_goods;
+            };
+            // es-GT: Verificacion de si esta seleccionado el check Servicios
+            if (item_row.facelec_po_is_service == 1) {
+                frm.doc.items[index].facelec_po_gt_tax_net_services_amt = (item_row.facelec_po_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_po_sales_tax_for_this_row = (item_row.facelec_po_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check servicios
+                total_servi = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.facelec_po_is_service == true) {
+                        total_servi += flt(d.facelec_po_gt_tax_net_services_amt);
+                    };
+                });
+                frm.doc.facelec_po_gt_tax_services = total_servi;
+            };
+            // es-GT: Sumatoria para obtener el IVA total
+            full_tax_iva = 0;
+            $.each(frm.doc.items || [], function (i, d) {
+                full_tax_iva += flt(d.facelec_po_sales_tax_for_this_row);
+            });
+            frm.doc.facelec_po_total_iva = full_tax_iva;
+        };
+    });
+}
+/*	1.10 en-US: Tax Calculation Conversions for Cotizacion de Compra END -------------*/
+/*	1.10 es-GT: Calculos y Conversiones para Cotizacion de Compra TERMINA ------------*/
+
+/*	1.11 en-US: Tax Calculation Conversions for Purchase Receipt BEGIN ---------------*/
+/*	1.11 es-GT: Calculos y Conversiones para Recibo de Compra EMPIEZA ----------------*/
+// Codigo Adaptado para Purchase Receipt (Recibo de Compra) 
+// Funcion para calculo de impuestos
+function shs_purchase_receipt_calculation(frm, cdt, cdn) {
+
+    refresh_field('items');
+
+    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
+
+    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
+
+    frm.doc.items.forEach((item_row, index) => {
+        if (item_row.name == cdn) {
+            this_row_amount = (item_row.qty * item_row.rate);
+            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
+            this_row_tax_rate = (item_row.facelec_pr_tax_rate_per_uom);
+            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
+            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
+            // Convert a number into a string, keeping only two decimals:
+            frm.doc.items[index].facelec_pr_other_tax_amount = ((item_row.facelec_pr_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
+            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
+            frm.doc.items[index].facelec_pr_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_pr_tax_rate_per_uom));
+            console.log("uom that just changed is: " + item_row.uom);
+            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            console.log("conversion_factor is: " + item_row.conversion_factor);
+            if (item_row.facelec_pr_is_fuel == 1) {
+                frm.doc.items[index].facelec_pr_gt_tax_net_fuel_amt = (item_row.facelec_pr_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_pr_sales_tax_for_this_row = (item_row.facelec_pr_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check combustibles
+                total_fuel = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    // total_qty += flt(d.qty);
+                    if (d.facelec_pr_is_fuel == true) {
+                        total_fuel += flt(d.facelec_pr_gt_tax_net_fuel_amt);
+                    };
+                });
+                frm.doc.facelec_pr_gt_tax_fuel = total_fuel;
+                //frm.refresh_field("factelec_p_is_fuel");
+            };
+            if (item_row.facelec_pr_is_good == 1) {
+                frm.doc.items[index].facelec_pr_gt_tax_net_goods_amt = (item_row.facelec_pr_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_pr_sales_tax_for_this_row = (item_row.facelec_pr_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check bienes
+                total_goods = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.facelec_pr_is_good == true) {
+                        total_goods += flt(d.facelec_pr_gt_tax_net_goods_amt);
+                    };
+                });
+                frm.doc.facelec_pr_gt_tax_goods = total_goods;
+            };
+            if (item_row.facelec_pr_is_service == 1) {
+                frm.doc.items[index].facelec_pr_gt_tax_net_services_amt = (item_row.facelec_pr_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
+                frm.doc.items[index].facelec_pr_sales_tax_for_this_row = (item_row.facelec_pr_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
+                // Sumatoria de todos los que tengan el check servicios
+                total_servi = 0;
+                $.each(frm.doc.items || [], function (i, d) {
+                    if (d.facelec_pr_is_service == true) {
+                        total_servi += flt(d.facelec_pr_gt_tax_net_services_amt);
+                    };
+                });
+                frm.doc.facelec_pr_gt_tax_services = total_servi;
+            };
+            full_tax_iva = 0;
+            $.each(frm.doc.items || [], function (i, d) {
+                full_tax_iva += flt(d.facelec_pr_sales_tax_for_this_row);
+            });
+            frm.doc.facelec_pr_total_iva = full_tax_iva;
+        };
+    });
+}
+/*	1.11 en-US: Tax Calculation Conversions for Purchase Receipt END -----------------*/
+/*	1.11 es-GT: Calculos y Conversiones para Recibo de Compra TERMINA ----------------*/
+
+/*	1 en-US: Functions END <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+/*	1 es-GT: Funciones TERMINAN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+/*	2 en-US: Triggers BEGIN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+/*	2 es-GT: Disparadores EMPIEZAN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+/*	2.1 en-US: Triggers for Sales Invoice BEGIN --------------------------------------*/
+/*	2.1 es-GT: Disparadores para Factura de Venta EMPIEZAN  --------------------------*/
 frappe.ui.form.on("Sales Invoice", {
     refresh: function (frm, cdt, cdn) {
         // Trigger refresh de pagina
@@ -545,7 +889,11 @@ frappe.ui.form.on("Sales Invoice", {
     // Funciona unicamente cuando se carga por primera vez el documento y aplica unicamente para el form y no childtables
     // }
 });
+/*	2.1 en-US: Triggers for Sales Invoice END ----------------------------------------*/
+/*	2.1 es-GT: Disparadores para Factura de Venta TERMINAN  --------------------------*/
 
+/*	2.2 en-US: Triggers for Sales Invoice Items BEGIN --------------------------------*/
+/*	2.2 es-GT: Disparadores para Productos de Factura de Venta EMPIEZAN  -------------*/
 frappe.ui.form.on("Sales Invoice Item", {
     items_add: function (frm, cdt, cdn) {},
     items_move: function (frm, cdt, cdn) {},
@@ -640,78 +988,11 @@ frappe.ui.form.on("Sales Invoice Item", {
         facelec_tax_calculation(frm, cdt, cdn);
     }
 });
+/*	2.2 en-US: Triggers for Sales Invoice Items END ----------------------------------*/
+/*	2.2 es-GT: Disparadores para Productos de Factura de Venta TERMINAN  -------------*/
 
-// Codigo Adaptado para Purchase Invoice (Factura de Compra) 
-// Funcion para calculo de impuestos
-function shs_purchase_invoice_calculation(frm, cdt, cdn) {
-
-    refresh_field('items');
-
-    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
-
-    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
-
-    frm.doc.items.forEach((item_row, index) => {
-        if (item_row.name == cdn) {
-            this_row_amount = (item_row.qty * item_row.rate);
-            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
-            this_row_tax_rate = (item_row.facelec_p_tax_rate_per_uom);
-            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
-            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
-            // Convert a number into a string, keeping only two decimals:
-            frm.doc.items[index].facelec_p_other_tax_amount = ((item_row.facelec_p_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
-            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
-            frm.doc.items[index].facelec_p_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_p_tax_rate_per_uom));
-            console.log("uom that just changed is: " + item_row.uom);
-            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
-            console.log("conversion_factor is: " + item_row.conversion_factor);
-            if (item_row.facelec_p_is_fuel == 1) {
-                frm.doc.items[index].facelec_p_gt_tax_net_fuel_amt = (item_row.facelec_p_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_p_sales_tax_for_this_row = (item_row.facelec_p_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check combustibles
-                total_fuel = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    // total_qty += flt(d.qty);
-                    if (d.facelec_p_is_fuel == true) {
-                        total_fuel += flt(d.facelec_p_gt_tax_net_fuel_amt);
-                    };
-                });
-                frm.doc.facelec_p_gt_tax_fuel = total_fuel;
-                //frm.refresh_field("factelec_p_is_fuel");
-            };
-            if (item_row.facelec_p_is_good == 1) {
-                frm.doc.items[index].facelec_p_gt_tax_net_goods_amt = (item_row.facelec_p_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_p_sales_tax_for_this_row = (item_row.facelec_p_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check bienes
-                total_goods = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.facelec_p_is_good == true) {
-                        total_goods += flt(d.facelec_p_gt_tax_net_goods_amt);
-                    };
-                });
-                frm.doc.facelec_p_gt_tax_goods = total_goods;
-            };
-            if (item_row.facelec_p_is_service == 1) {
-                frm.doc.items[index].facelec_p_gt_tax_net_services_amt = (item_row.facelec_p_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_p_sales_tax_for_this_row = (item_row.facelec_p_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check servicios
-                total_servi = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.facelec_p_is_service == true) {
-                        total_servi += flt(d.facelec_p_gt_tax_net_services_amt);
-                    };
-                });
-                frm.doc.facelec_p_gt_tax_services = total_servi;
-            };
-            full_tax_iva = 0;
-            $.each(frm.doc.items || [], function (i, d) {
-                full_tax_iva += flt(d.facelec_p_sales_tax_for_this_row);
-            });
-            frm.doc.facelec_p_total_iva = full_tax_iva;
-        };
-    });
-}
-
+/*	2.3 en-US: Triggers for Purchase Invoice BEGIN -----------------------------------*/
+/*	2.3 es-GT: Disparadores para Factura de Compra EMPIEZAN  -------------------------*/
 frappe.ui.form.on("Purchase Invoice", {
     refresh: function (frm, cdt, cdn) {
         // Trigger refresh de pagina
@@ -766,7 +1047,11 @@ frappe.ui.form.on("Purchase Invoice", {
         });
     },
 });
+/*	2.3 en-US: Triggers for Purchase Invoice END -------------------------------------*/
+/*	2.3 es-GT: Disparadores para Factura de Compra TERMINAN  -------------------------*/
 
+/*	2.4 en-US: Triggers for Purchase Invoice Items BEGIN -----------------------------*/
+/*	2.4 es-GT: Disparadores para Productos de Factura de Compra EMPIEZAN  ------------*/
 frappe.ui.form.on("Purchase Invoice Item", {
     items_add: function (frm, cdt, cdn) {},
     items_move: function (frm, cdt, cdn) {},
@@ -855,78 +1140,11 @@ frappe.ui.form.on("Purchase Invoice Item", {
         shs_purchase_invoice_calculation(frm, cdt, cdn);
     }
 });
+/*	2.4 en-US: Triggers for Purchase Invoice Items END -------------------------------*/
+/*	2.4 es-GT: Disparadores para Productos de Factura de Compra TERMINAN  ------------*/
 
-// Codigo Adaptado para Purchase Quotation (Cotizacion de compra)
-// Funcion para calculo de impuestos
-function shs_quotation_calculation(frm, cdt, cdn) {
-
-    refresh_field('items');
-
-    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
-
-    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
-
-    frm.doc.items.forEach((item_row, index) => {
-        if (item_row.name == cdn) {
-            this_row_amount = (item_row.qty * item_row.rate);
-            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
-            this_row_tax_rate = (item_row.facelec_qt_tax_rate_per_uom);
-            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
-            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
-            // Convert a number into a string, keeping only two decimals:
-            frm.doc.items[index].facelec_qt_other_tax_amount = ((item_row.facelec_qt_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
-            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
-            frm.doc.items[index].facelec_qt_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_qt_tax_rate_per_uom));
-            console.log("uom that just changed is: " + item_row.uom);
-            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
-            console.log("conversion_factor is: " + item_row.conversion_factor);
-            if (item_row.facelec_qt_is_fuel == 1) {
-                frm.doc.items[index].facelec_qt_gt_tax_net_fuel_amt = (item_row.facelec_qt_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_qt_sales_tax_for_this_row = (item_row.facelec_qt_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check combustibles
-                total_fuel = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    // total_qty += flt(d.qty);
-                    if (d.facelec_qt_is_fuel == true) {
-                        total_fuel += flt(d.facelec_qt_gt_tax_net_fuel_amt);
-                    };
-                });
-                frm.doc.facelec_qt_gt_tax_fuel = total_fuel;
-                //frm.refresh_field("factelec_p_is_fuel");
-            };
-            if (item_row.facelec_qt_is_good == 1) {
-                frm.doc.items[index].facelec_qt_gt_tax_net_goods_amt = (item_row.facelec_qt_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_qt_sales_tax_for_this_row = (item_row.facelec_qt_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check bienes
-                total_goods = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.facelec_qt_is_good == true) {
-                        total_goods += flt(d.facelec_qt_gt_tax_net_goods_amt);
-                    };
-                });
-                frm.doc.facelec_qt_gt_tax_goods = total_goods;
-            };
-            if (item_row.facelec_qt_is_service == 1) {
-                frm.doc.items[index].facelec_qt_gt_tax_net_services_amt = (item_row.facelec_qt_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_qt_sales_tax_for_this_row = (item_row.facelec_qt_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check servicios
-                total_servi = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.facelec_qt_is_service == true) {
-                        total_servi += flt(d.facelec_qt_gt_tax_net_services_amt);
-                    };
-                });
-                frm.doc.facelec_qt_gt_tax_services = total_servi;
-            };
-            full_tax_iva = 0;
-            $.each(frm.doc.items || [], function (i, d) {
-                full_tax_iva += flt(d.facelec_qt_sales_tax_for_this_row);
-            });
-            frm.doc.facelec_qt_total_iva = full_tax_iva;
-        };
-    });
-}
-
+/*	2.5 en-US: Triggers for Quotation BEGIN ------------------------------------------*/
+/*	2.5 es-GT: Disparadores para Cotización EMPIEZA  ---------------------------------*/
 frappe.ui.form.on("Quotation", {
     refresh: function (frm, cdt, cdn) {
         // Trigger refresh de pagina
@@ -981,7 +1199,11 @@ frappe.ui.form.on("Quotation", {
         });
     },
 });
+/*	2.5 en-US: Triggers for Quotation END --------------------------------------------*/
+/*	2.5 es-GT: Disparadores para Cotización TERMINA  ---------------------------------*/
 
+/*	2.6 en-US: Triggers for Quotation Item BEGIN -------------------------------------*/
+/*	2.6 es-GT: Disparadores para Producto de Cotización EMPIEZA  ---------------------*/
 frappe.ui.form.on("Quotation Item", {
     items_add: function (frm, cdt, cdn) {},
     items_move: function (frm, cdt, cdn) {},
@@ -1070,82 +1292,11 @@ frappe.ui.form.on("Quotation Item", {
         shs_quotation_calculation(frm, cdt, cdn);
     }
 });
+/*	2.6 en-US: Triggers for Quotation Item END ---------------------------------------*/
+/*	2.6 es-GT: Disparadores para Producto de Cotización TERMINA  ---------------------*/
 
-// Codigo Adaptado para Purchase Order (Orden de compra)
-// Funcion para calculo de impuestos
-function shs_purchase_order_calculation(frm, cdt, cdn) {
-    // es-GT: Actualiza los campos de la tabla hija 'items'
-    refresh_field('items');
-    // es-GT: Asigna a la variable el valor rate de la tabla hija 'taxes' en la posicion 0
-    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
-
-    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
-    // es-GT: Funcion que permite realizar los calculos necesarios dependiendo de la linea en la que se este trabajando
-    frm.doc.items.forEach((item_row, index) => {
-        if (item_row.name == cdn) {
-            this_row_amount = (item_row.qty * item_row.rate);
-            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
-            this_row_tax_rate = (item_row.facelec_po_tax_rate_per_uom);
-            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
-            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
-            // Convert a number into a string, keeping only two decimals:
-            frm.doc.items[index].facelec_po_other_tax_amount = ((item_row.facelec_po_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
-            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
-            frm.doc.items[index].facelec_po_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_po_tax_rate_per_uom));
-            console.log("uom that just changed is: " + item_row.uom);
-            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
-            console.log("conversion_factor is: " + item_row.conversion_factor);
-            // es-GT: Verificacion de si esta seleccionado el check Combustible
-            if (item_row.facelec_po_is_fuel == 1) {
-                frm.doc.items[index].facelec_po_gt_tax_net_fuel_amt = (item_row.facelec_po_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_po_sales_tax_for_this_row = (item_row.facelec_po_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check combustibles
-                total_fuel = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    // total_qty += flt(d.qty);
-                    if (d.facelec_po_is_fuel == true) {
-                        total_fuel += flt(d.facelec_po_gt_tax_net_fuel_amt);
-                    };
-                });
-                frm.doc.facelec_po_gt_tax_fuel = total_fuel;
-                //frm.refresh_field("factelec_p_is_fuel");
-            };
-            // es-GT: Verificacion de si esta seleccionado el check Bienes
-            if (item_row.facelec_po_is_good == 1) {
-                frm.doc.items[index].facelec_po_gt_tax_net_goods_amt = (item_row.facelec_po_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_po_sales_tax_for_this_row = (item_row.facelec_po_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check bienes
-                total_goods = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.facelec_po_is_good == true) {
-                        total_goods += flt(d.facelec_po_gt_tax_net_goods_amt);
-                    };
-                });
-                frm.doc.facelec_po_gt_tax_goods = total_goods;
-            };
-            // es-GT: Verificacion de si esta seleccionado el check Servicios
-            if (item_row.facelec_po_is_service == 1) {
-                frm.doc.items[index].facelec_po_gt_tax_net_services_amt = (item_row.facelec_po_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_po_sales_tax_for_this_row = (item_row.facelec_po_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check servicios
-                total_servi = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.facelec_po_is_service == true) {
-                        total_servi += flt(d.facelec_po_gt_tax_net_services_amt);
-                    };
-                });
-                frm.doc.facelec_po_gt_tax_services = total_servi;
-            };
-            // es-GT: Sumatoria para obtener el IVA total
-            full_tax_iva = 0;
-            $.each(frm.doc.items || [], function (i, d) {
-                full_tax_iva += flt(d.facelec_po_sales_tax_for_this_row);
-            });
-            frm.doc.facelec_po_total_iva = full_tax_iva;
-        };
-    });
-}
-
+/*	2.7 en-US: Triggers for Purchase Order BEGIN -------------------------------------*/
+/*	2.7 es-GT: Disparadores para Orden de Compra EMPIEZA  ----------------------------*/
 frappe.ui.form.on("Purchase Order", {
     refresh: function (frm, cdt, cdn) {
         // Trigger refresh de pagina
@@ -1200,7 +1351,11 @@ frappe.ui.form.on("Purchase Order", {
         });
     },
 });
+/*	2.7 en-US: Triggers for Purchase Order END ---------------------------------------*/
+/*	2.7 es-GT: Disparadores para Orden de Compra TERMINA  ----------------------------*/
 
+/*	2.8 en-US: Triggers for Purchase Order Items BEGIN -------------------------------*/
+/*	2.8 es-GT: Disparadores para Productos de Orden de Compra EMPIEZA ----------------*/
 frappe.ui.form.on("Purchase Order Item", {
     items_add: function (frm, cdt, cdn) {},
     items_move: function (frm, cdt, cdn) {},
@@ -1289,77 +1444,8 @@ frappe.ui.form.on("Purchase Order Item", {
         shs_purchase_order_calculation(frm, cdt, cdn);
     }
 });
-
-// Codigo Adaptado para Purchase Receipt (Recibo de Compra) 
-// Funcion para calculo de impuestos
-function shs_purchase_receipt_calculation(frm, cdt, cdn) {
-
-    refresh_field('items');
-
-    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
-
-    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
-
-    frm.doc.items.forEach((item_row, index) => {
-        if (item_row.name == cdn) {
-            this_row_amount = (item_row.qty * item_row.rate);
-            this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
-            this_row_tax_rate = (item_row.facelec_pr_tax_rate_per_uom);
-            this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
-            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
-            // Convert a number into a string, keeping only two decimals:
-            frm.doc.items[index].facelec_pr_other_tax_amount = ((item_row.facelec_pr_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
-            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
-            frm.doc.items[index].facelec_pr_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_pr_tax_rate_per_uom));
-            console.log("uom that just changed is: " + item_row.uom);
-            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
-            console.log("conversion_factor is: " + item_row.conversion_factor);
-            if (item_row.facelec_pr_is_fuel == 1) {
-                frm.doc.items[index].facelec_pr_gt_tax_net_fuel_amt = (item_row.facelec_pr_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_pr_sales_tax_for_this_row = (item_row.facelec_pr_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check combustibles
-                total_fuel = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    // total_qty += flt(d.qty);
-                    if (d.facelec_pr_is_fuel == true) {
-                        total_fuel += flt(d.facelec_pr_gt_tax_net_fuel_amt);
-                    };
-                });
-                frm.doc.facelec_pr_gt_tax_fuel = total_fuel;
-                //frm.refresh_field("factelec_p_is_fuel");
-            };
-            if (item_row.facelec_pr_is_good == 1) {
-                frm.doc.items[index].facelec_pr_gt_tax_net_goods_amt = (item_row.facelec_pr_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_pr_sales_tax_for_this_row = (item_row.facelec_pr_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check bienes
-                total_goods = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.facelec_pr_is_good == true) {
-                        total_goods += flt(d.facelec_pr_gt_tax_net_goods_amt);
-                    };
-                });
-                frm.doc.facelec_pr_gt_tax_goods = total_goods;
-            };
-            if (item_row.facelec_pr_is_service == 1) {
-                frm.doc.items[index].facelec_pr_gt_tax_net_services_amt = (item_row.facelec_pr_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_pr_sales_tax_for_this_row = (item_row.facelec_pr_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check servicios
-                total_servi = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.facelec_pr_is_service == true) {
-                        total_servi += flt(d.facelec_pr_gt_tax_net_services_amt);
-                    };
-                });
-                frm.doc.facelec_pr_gt_tax_services = total_servi;
-            };
-            full_tax_iva = 0;
-            $.each(frm.doc.items || [], function (i, d) {
-                full_tax_iva += flt(d.facelec_pr_sales_tax_for_this_row);
-            });
-            frm.doc.facelec_pr_total_iva = full_tax_iva;
-        };
-    });
-}
+/*	2.8 en-US: Triggers for Purchase Order Items END ---------------------------------*/
+/*	2.8 es-GT: Disparadores para Productos de Orden de Compra TERMINA ----------------*/
 
 frappe.ui.form.on("Purchase Receipt", {
     refresh: function (frm, cdt, cdn) {
