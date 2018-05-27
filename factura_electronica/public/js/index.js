@@ -80,6 +80,12 @@
 /*	1.13 en-US: Tax Calculation Conversions for Delivery Note END --------------------*/
 /*	1.13 es-GT: Calculos y Conversiones para Nota de Entrega TERMINA -----------------*/
 
+/*	1.14 en-US: Tax Calculation Conversions for Supplier Quotation BEGIN -------------*/
+/*	1.14 es-GT: Calculos y Conversiones para Presupuesto de Proveedor EMPIEZA --------*/
+
+/*	1.14 en-US: Tax Calculation Conversions for Supplier Quotation END ---------------*/
+/*	1.14 es-GT: Calculos y Conversiones para Presupuesto de Proveedor TERMINA --------*/
+
 /*	2.1 en-US: Triggers for Sales Invoice BEGIN --------------------------------------*/
 /*	2.1 es-GT: Disparadores para Factura de Venta EMPIEZAN  --------------------------*/
 
@@ -106,3 +112,40 @@
 
 /*	2.8 en-US: Triggers for Purchase Order Items BEGIN -------------------------------*/
 /*	2.8 es-GT: Disparadores para Productos de Orden de Compra EMPIEZA ----------------*/
+
+/*	2.9 en-US: Triggers for Purchase Receipt BEGIN -----------------------------------*/
+/*	2.9 es-GT: Disparadores para Recibo de Compra EMPIEZA ----------------------------*/
+
+/*	2.10 en-US: Triggers for Purchase Receipt Item BEGIN -----------------------------*/
+/*	2.10 es-GT: Disparadores para Productos de Recibo de Compra EMPIEZA --------------*/
+
+/*	2.11 en-US: Triggers for Sales Order BEGIN ---------------------------------------*/
+/*	2.11 es-GT: Disparadores para Orden de Venta EMPIEZA -----------------------------*/
+
+/*	2.12 en-US: Triggers for Sales Order Item BEGIN ----------------------------------*/
+/*	2.12 es-GT: Disparadores para Productos de Orden de Venta EMPIEZA ----------------*/
+
+/*	2.13 en-US: Triggers for Delivery Note BEGIN -------------------------------------*/
+/*	2.13 es-GT: Disparadores para Nota de Entrega EMPIEZA ----------------------------*/
+
+/*	2.13 en-US: Triggers for Delivery Note END ---------------------------------------*/
+/*	2.13 es-GT: Disparadores para Nota de Entrega TERMINA ----------------------------*/
+
+/*	2.14 en-US: Triggers for Delivery Note Item BEGIN --------------------------------*/
+/*	2.14 es-GT: Disparadores para Producto de Nota de Entrega EMPIEZA ----------------*/
+
+/*	2.14 en-US: Triggers for Delivery Note Item END ----------------------------------*/
+/*	2.14 es-GT: Disparadores para Producto de Nota de Entrega TERMINA ----------------*/
+
+/*	2.15 en-US: Triggers for Supplier Quotation BEGIN --------------------------------*/
+/*	2.15 es-GT: Disparadores para Presupuesto de Proveedor EMPIEZA -------------------*/
+
+/*	2.15 en-US: Triggers for Supplier Quotation END ----------------------------------*/
+/*	2.15 es-GT: Disparadores para Presupuesto de Proveedor TERMINA -------------------*/
+
+/*	2.16 en-US: Triggers for Supplier Quotation Item BEGIN ---------------------------*/
+/*	2.16 es-GT: Disparadores para Producto de Presupuesto de Proveedor EMPIEZA -------*/
+
+/*	2.16 en-US: Triggers for Supplier Quotation Item END -----------------------------*/
+/*	2.16 es-GT: Disparadores para Producto de Presupuesto de Proveedor TERMINA -------*/
+
