@@ -1046,6 +1046,16 @@ function shs_supplier_quotation_calculation(frm, cdt, cdn) {
 
 /*	2.1 en-US: Triggers for Sales Invoice BEGIN --------------------------------------*/
 /*	2.1 es-GT: Disparadores para Factura de Venta EMPIEZAN  --------------------------*/
+
+frappe.ui.form.on("Sales Invoice", {
+	'onload_post_render': function(frm) {
+		frm.fields_dict.items.grid.wrapper.on('focus', 'input[data-fieldname="item_code"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log(e.type);
+			alert("hi");
+		});
+	}
+});
+
 frappe.ui.form.on("Sales Invoice", {
     refresh: function (frm, cdt, cdn) {
         // Trigger refresh de pagina
@@ -1143,20 +1153,23 @@ frappe.ui.form.on("Sales Invoice", {
 		
 		// Esta es la adaptación para poder agregarle "listener" o "disparadores" al campo específico.
 		cur_frm.fields_dict.customer.$input.on("focus", function(evt){
-			console.log("Se hizo focus en el campo");
+			console.log("Se hizo click en el campo");
 		});
 		cur_frm.fields_dict.customer.$input.on("mouseenter", function(evt){
-			console.log("Entro en el campo");
+			console.log("Puntero de Ratón Entro en el campo");
 		});
-		// When mosue leaves the field
+		// When mouse leaves the field
 		cur_frm.fields_dict.customer.$input.on("mouseleave", function(evt){
-			console.log("Salió del campo");
+			console.log("Puntero de Ratón Salió del campo");
 		});
 		// When ANY key is in pressed position, except SHIFT, Fn, Caps Lock
 		cur_frm.fields_dict.customer.$input.on("keypress", function(evt){
 			console.log("Se esta presionando una tecla");
 		});
-		
+		// When ANY key is released after being pressed
+		cur_frm.fields_dict.customer.$input.on("keyup", function(evt){
+			console.log("Se acaba de soltar una tecla");
+		});
 		
 		/*cur_frm.body.$input.on("mousemove", function(evt){
 			console.log("Mousemove sobre el body de la pagina");
@@ -1266,6 +1279,12 @@ frappe.ui.form.on("Sales Invoice Item", {
     },
     rate: function (frm, cdt, cdn) {
         facelec_tax_calculation(frm, cdt, cdn);
+    },
+    onload_post_render: function(frm, cdt, cdn){
+		console.log('Funcionando Onload Post Render Trigger'); //SI FUNCIONA EL TRIGGER
+		// Funciona unicamente cuando se carga por primera vez el documento y aplica unicamente para el form y no childtables
+		
+		// Esta es la adaptación para poder agregarle "listener" o "disparadores" al campo específico.
     }
 });
 /*	2.2 en-US: Triggers for Sales Invoice Items END ----------------------------------*/
