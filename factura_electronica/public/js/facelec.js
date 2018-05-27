@@ -14,13 +14,27 @@ It is organized into two main sections: One for functions, another for triggers
 1.9 en-US: Tax Calculation Conversions for Cotizacion de Compra
 1.10 en-US: Tax Calculation Conversions for Quotation Item
 1.11 en-US: Tax Calculation Conversions for Purchase Receipt
-
+1.12 en-US: Tax Calculation Conversions for Sales Order
+1.13 en-US: Tax Calculation Conversions for Delivery Note
+1.14 en-US: Tax Calculation Conversions for Supplier Quotation
 
 2. Triggers
-2.1
-2.2
-2.3
-2.4
+2.1 en-US: Triggers for Sales Invoice
+2.2 en-US: Triggers for Sales Invoice Items
+2.3 en-US: Triggers for Purchase Invoice
+2.4 en-US: Triggers for Purchase Invoice Items
+2.5 en-US: Triggers for Quotation
+2.6 en-US: Triggers for Quotation Item
+2.7 en-US: Triggers for Purchase Order
+2.8 en-US: Triggers for Purchase Order Items
+2.9 en-US: Triggers for Purchase Receipt
+2.10 en-US: Triggers for Purchase Receipt Item
+2.11 en-US: Triggers for Sales Order
+2.12 en-US: Triggers for Sales Order Item
+2.13 en-US: Triggers for Delivery Note
+2.14 en-US: Triggers for Delivery Note Item
+2.15 en-US: Triggers for Supplier Quotation
+2.16 en-US: Triggers for Supplier Quotation Item
 
 # es-GT: Indice para Aplicacion Factura Electronica
 Este archivo JavaScript contiene las funciones que corren en la máquina del cliente
@@ -37,12 +51,27 @@ Esta organizado en dos principales secciones: Una para funciones, otra para disp
 1.9 es-GT: Calculos y Conversiones para Cotizacion de Compra
 1.10 es-GT: Calculos y Conversiones para Quotation Item
 1.11 es-GT: Calculos y Conversiones para Recibo de Compra
+1.12 es-GT: Calculos y Conversiones para Orden de Venta
+1.13 es-GT: Calculos y Conversiones para Nota de Entrega
+1.14 es-GT: Calculos y Conversiones para Presupuesto de Proveedor
 
 2. Disparadores
-2.1
-2.2
-2.3
-2.4
+2.1 es-GT: Disparadores para Factura de Venta
+2.2 es-GT: Disparadores para Productos de Factura de Venta
+2.3 es-GT: Disparadores para Factura de Compra
+2.4 es-GT: Disparadores para Productos de Factura de Compra
+2.5 es-GT: Disparadores para Cotización
+2.6 es-GT: Disparadores para Producto de Cotización
+2.7 es-GT: Disparadores para Orden de Compra
+2.8 es-GT: Disparadores para Productos de Orden de Compra
+2.9 es-GT: Disparadores para Recibo de Compra
+2.10 es-GT: Disparadores para Productos de Recibo de Compra
+2.11 es-GT: Disparadores para Orden de Venta
+2.12 es-GT: Disparadores para Productos de Orden de Venta
+2.13 es-GT: Disparadores para Nota de Entrega 
+2.14 es-GT: Disparadores para Producto de Nota de Entrega
+2.15 es-GT: Disparadores para Presupuesto de Proveedor
+2.16 es-GT: Disparadores para Producto de Presupuesto de Proveedor
 */
 
 /*	1 en-US: Functions BEGIN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/

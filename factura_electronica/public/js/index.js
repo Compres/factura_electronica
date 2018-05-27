@@ -110,6 +110,24 @@
 /*	2.4 en-US: Triggers for Purchase Invoice Items END -------------------------------*/
 /*	2.4 es-GT: Disparadores para Productos de Factura de Compra TERMINAN  ------------*/
 
+/*	2.5 en-US: Triggers for Quotation BEGIN ------------------------------------------*/
+/*	2.5 es-GT: Disparadores para Cotización EMPIEZA  ---------------------------------*/
+
+/*	2.5 en-US: Triggers for Quotation END --------------------------------------------*/
+/*	2.5 es-GT: Disparadores para Cotización TERMINA  ---------------------------------*/
+
+/*	2.6 en-US: Triggers for Quotation Item BEGIN -------------------------------------*/
+/*	2.6 es-GT: Disparadores para Producto de Cotización EMPIEZA  ---------------------*/
+
+/*	2.6 en-US: Triggers for Quotation Item END ---------------------------------------*/
+/*	2.6 es-GT: Disparadores para Producto de Cotización TERMINA  ---------------------*/
+
+/*	2.7 en-US: Triggers for Purchase Order BEGIN -------------------------------------*/
+/*	2.7 es-GT: Disparadores para Orden de Compra EMPIEZA  ----------------------------*/
+
+/*	2.7 en-US: Triggers for Purchase Order END ---------------------------------------*/
+/*	2.7 es-GT: Disparadores para Orden de Compra TERMINA  ----------------------------*/
+
 /*	2.8 en-US: Triggers for Purchase Order Items BEGIN -------------------------------*/
 /*	2.8 es-GT: Disparadores para Productos de Orden de Compra EMPIEZA ----------------*/
 
