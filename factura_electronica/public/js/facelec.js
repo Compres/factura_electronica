@@ -1137,11 +1137,37 @@ frappe.ui.form.on("Sales Invoice", {
     //     // generado el CAE para el documento requerido.
     //     verificacionCAE(frm, cdt, cdn);
     // },
-    // onload_post_render: function(frm, cdt, cdn){
-    // console.log('si funciona')
-    // console.log('Funcionando Onload Trigger'); SI FUNCIONA EL TRIGGER
-    // Funciona unicamente cuando se carga por primera vez el documento y aplica unicamente para el form y no childtables
-    // }
+    onload_post_render: function(frm, cdt, cdn){
+		console.log('Funcionando Onload Post Render Trigger'); //SI FUNCIONA EL TRIGGER
+		// Funciona unicamente cuando se carga por primera vez el documento y aplica unicamente para el form y no childtables
+		
+		// Esta es la adaptación para poder agregarle "listener" o "disparadores" al campo específico.
+		cur_frm.fields_dict.customer.$input.on("focus", function(evt){
+			console.log("Se hizo focus en el campo");
+		});
+		cur_frm.fields_dict.customer.$input.on("mouseenter", function(evt){
+			console.log("Entro en el campo");
+		});
+		// When mosue leaves the field
+		cur_frm.fields_dict.customer.$input.on("mouseleave", function(evt){
+			console.log("Salió del campo");
+		});
+		// When ANY key is in pressed position, except SHIFT, Fn, Caps Lock
+		cur_frm.fields_dict.customer.$input.on("keypress", function(evt){
+			console.log("Se esta presionando una tecla");
+		});
+		
+		
+		/*cur_frm.body.$input.on("mousemove", function(evt){
+			console.log("Mousemove sobre el body de la pagina");
+		});
+		cur_frm.fields_dict.customer.$input.on("focus", function(evt){
+			console.log("Si se habilito el listener al hacer focus en el campo");
+		});
+		cur_frm.fields_dict.customer.$input.on("focus", function(evt){
+			console.log("Si se habilito el listener al hacer focus en el campo");
+		});*/
+    }
 });
 /*	2.1 en-US: Triggers for Sales Invoice END ----------------------------------------*/
 /*	2.1 es-GT: Disparadores para Factura de Venta TERMINAN  --------------------------*/
