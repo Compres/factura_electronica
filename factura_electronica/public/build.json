@@ -1,5 +1,3 @@
 {
-    "factura_electronica/js/facelec.min.js": [
-        "public/js/facelec.js"
-    ]
+	"factura_electronica/js/facelec.min.js": ["public/js/facelec.js"]
 }

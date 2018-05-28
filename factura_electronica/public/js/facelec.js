@@ -1,3 +1,4 @@
+console.log("Se cargo exitosamente la aplicación de Factura Electronica");
 /*
 # en-US: Index for Factura Electronica App
 This JavaScript file contains the functions that run on the client machine.
@@ -94,17 +95,32 @@ function facelec_tax_calculation_conversion(frm, cdt, cdn) {
     // es-GT: Esta funcion permite trabajar linea por linea de la tabla hija items
     frm.doc.items.forEach((item_row, index) => {
         if (item_row.name == cdn) {
+			// first we calculate the amount total for this row and assign it to a variable
             this_row_amount = (item_row.qty * item_row.rate);
+			// Now, we get the quantity in terms of stock quantity by multiplying by conversion factor
             this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
+			// We then assign the tax rate per stock UOM to a variable
             this_row_tax_rate = (item_row.facelec_tax_rate_per_uom);
+			// We calculate the total amount of excise or special tax based on the stock quantity and tax rate per uom variables above.
             this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
+			// We then estimate the remainder taxable amount for which Other ERPNext configured taxes will apply.
             this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
-            // Convert a number into a string, keeping only two decimals:
-            frm.doc.items[index].facelec_other_tax_amount = ((item_row.facelec_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
-            //OJO!  No s epuede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
-            frm.doc.items[index].facelec_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_tax_rate_per_uom));
+			// We change the fields for other tax amount as per the complete row taxable amount.
+			// Old version, uncomment in case items do not work properly.
+			//frm.doc.items[index].facelec_other_tax_amount = ((item_row.facelec_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
+			frm.doc.items[index].facelec_other_tax_amount = this_row_taxable_amount;
+			//OJO!  No se puede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
+			// Old version, uncomment in case items do not work properly.
+			//frm.doc.items[index].facelec_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_tax_rate_per_uom));
+			frm.doc.items[index].facelec_amount_minus_excise_tax = this_row_taxable_amount;
+			
             console.log("uom that just changed is: " + item_row.uom);
             console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            // Por alguna razón esta multiplicando y obteniendo valores negativos  FIXME
+			// absoluto? FIXME
+			// Que sucedera con una nota de crédito? FIXME
+			// Absoluto y luego NEGATIVIZADO!? FIXME
+			// Any way to run the function TWICE?
             console.log("conversion_factor is: " + item_row.conversion_factor);
 
             // Verificacion Individual para verificar si es Fuel, Good o Service
@@ -190,10 +206,11 @@ function facelec_tax_calc_new(frm, cdt, cdn) {
 	// es-GT: Ahora se hace con un event listener al primer teclazo del campo de cliente
 	// es-GT: Sin embargo queda aqui para asegurar que el valor sea el correcto en todo momento.
     //console.log("If you can see this, tax rate variable now exists, and its set to: " + this_company_sales_tax_var);
-
+	console.log("Ran the new tax calc function!");
     var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
 
     // es-GT: Esta funcion permite trabajar linea por linea de la tabla hija items
+	//OJO!  Queda pendiente trabajar la forma de que el control o pop up que contiene estos datos, a la hora de cambiar conversion factor, funcione adecuadamente! FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME 
     frm.doc.items.forEach((item_row, index) => {
         if (item_row.name == cdn) {
             this_row_amount = (item_row.qty * item_row.rate);
@@ -207,6 +224,10 @@ function facelec_tax_calc_new(frm, cdt, cdn) {
             frm.doc.items[index].facelec_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_tax_rate_per_uom));
             console.log("uom that just changed is: " + item_row.uom);
             console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            // Por alguna razón esta multiplicando y obteniendo valores negativos  FIXME
+			// absoluto? FIXME
+			// Que sucedera con una nota de crédito? FIXME
+			// Absoluto y luego NEGATIVIZADO!? FIXME
             console.log("conversion_factor is: " + item_row.conversion_factor);
 
             // Verificacion Individual para verificar si es Fuel, Good o Service
@@ -278,7 +299,6 @@ function facelec_tax_calc_new(frm, cdt, cdn) {
 }
 /*	1.1a en-US: Tax Calculation Conversions END --------------------------------------*/
 /*	1.1a es-GT: Calculos y Conversiones de impuestos TERMINA -------------------------*/
-
 
 /*	1.2 en-US: Search Tax Account BEGIN ----------------------------------------------*/
 /*	1.2 es-GT: Busqueda de Cuenta de Impuestos EMPIEZA -------------------------------*/
@@ -637,6 +657,10 @@ function shs_purchase_invoice_calculation(frm, cdt, cdn) {
             frm.doc.items[index].facelec_p_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_p_tax_rate_per_uom));
             console.log("uom that just changed is: " + item_row.uom);
             console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            // Por alguna razón esta multiplicando y obteniendo valores negativos  FIXME
+			// absoluto? FIXME
+			// Que sucedera con una nota de crédito? FIXME
+			// Absoluto y luego NEGATIVIZADO!? FIXME
             console.log("conversion_factor is: " + item_row.conversion_factor);
             if (item_row.facelec_p_is_fuel == 1) {
                 frm.doc.items[index].facelec_p_gt_tax_net_fuel_amt = (item_row.facelec_p_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
@@ -712,6 +736,10 @@ function shs_quotation_calculation(frm, cdt, cdn) {
             frm.doc.items[index].facelec_qt_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_qt_tax_rate_per_uom));
             console.log("uom that just changed is: " + item_row.uom);
             console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            // Por alguna razón esta multiplicando y obteniendo valores negativos  FIXME
+			// absoluto? FIXME
+			// Que sucedera con una nota de crédito? FIXME
+			// Absoluto y luego NEGATIVIZADO!? FIXME
             console.log("conversion_factor is: " + item_row.conversion_factor);
             if (item_row.facelec_qt_is_fuel == 1) {
                 frm.doc.items[index].facelec_qt_gt_tax_net_fuel_amt = (item_row.facelec_qt_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
@@ -787,6 +815,10 @@ function shs_purchase_order_calculation(frm, cdt, cdn) {
             frm.doc.items[index].facelec_po_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_po_tax_rate_per_uom));
             console.log("uom that just changed is: " + item_row.uom);
             console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            // Por alguna razón esta multiplicando y obteniendo valores negativos  FIXME
+			// absoluto? FIXME
+			// Que sucedera con una nota de crédito? FIXME
+			// Absoluto y luego NEGATIVIZADO!? FIXME
             console.log("conversion_factor is: " + item_row.conversion_factor);
             // es-GT: Verificacion de si esta seleccionado el check Combustible
             if (item_row.facelec_po_is_fuel == 1) {
@@ -866,6 +898,10 @@ function shs_purchase_receipt_calculation(frm, cdt, cdn) {
             frm.doc.items[index].facelec_pr_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_pr_tax_rate_per_uom));
             console.log("uom that just changed is: " + item_row.uom);
             console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            // Por alguna razón esta multiplicando y obteniendo valores negativos  FIXME
+			// absoluto? FIXME
+			// Que sucedera con una nota de crédito? FIXME
+			// Absoluto y luego NEGATIVIZADO!? FIXME
             console.log("conversion_factor is: " + item_row.conversion_factor);
             if (item_row.facelec_pr_is_fuel == 1) {
                 frm.doc.items[index].facelec_pr_gt_tax_net_fuel_amt = (item_row.facelec_pr_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
@@ -941,6 +977,10 @@ function shs_sales_order_calculation(frm, cdt, cdn) {
             frm.doc.items[index].shs_so_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.shs_so_tax_rate_per_uom));
             console.log("uom that just changed is: " + item_row.uom);
             console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            // Por alguna razón esta multiplicando y obteniendo valores negativos  FIXME
+			// absoluto? FIXME
+			// Que sucedera con una nota de crédito? FIXME
+			// Absoluto y luego NEGATIVIZADO!? FIXME
             console.log("conversion_factor is: " + item_row.conversion_factor);
             if (item_row.shs_so_is_fuel === 1) {
                 frm.doc.items[index].shs_so_gt_tax_net_fuel_amt = (item_row.shs_so_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
@@ -1016,6 +1056,10 @@ function shs_delivery_note_calculation(frm, cdt, cdn) {
             frm.doc.items[index].shs_dn_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.shs_dn_tax_rate_per_uom));
             console.log("uom that just changed is: " + item_row.uom);
             console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            // Por alguna razón esta multiplicando y obteniendo valores negativos  FIXME
+			// absoluto? FIXME
+			// Que sucedera con una nota de crédito? FIXME
+			// Absoluto y luego NEGATIVIZADO!? FIXME
             console.log("conversion_factor is: " + item_row.conversion_factor);
             if (item_row.shs_dn_is_fuel == 1) {
                 frm.doc.items[index].shs_dn_gt_tax_net_fuel_amt = (item_row.shs_dn_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
@@ -1091,6 +1135,10 @@ function shs_supplier_quotation_calculation(frm, cdt, cdn) {
             frm.doc.items[index].shs_spq_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.shs_spq_tax_rate_per_uom));
             console.log("uom that just changed is: " + item_row.uom);
             console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
+            // Por alguna razón esta multiplicando y obteniendo valores negativos  FIXME
+			// absoluto? FIXME
+			// Que sucedera con una nota de crédito? FIXME
+			// Absoluto y luego NEGATIVIZADO!? FIXME
             console.log("conversion_factor is: " + item_row.conversion_factor);
             if (item_row.shs_spq_is_fuel == 1) {
                 frm.doc.items[index].shs_spq_gt_tax_net_fuel_amt = (item_row.shs_spq_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
@@ -1150,7 +1198,6 @@ function shs_supplier_quotation_calculation(frm, cdt, cdn) {
 /*	2.1 en-US: Triggers for Sales Invoice BEGIN --------------------------------------*/
 /*	2.1 es-GT: Disparadores para Factura de Venta EMPIEZAN  --------------------------*/
 frappe.ui.form.on("Sales Invoice", {
-	/* */
 	onload_post_render: function(frm, cdt, cdn){
 		console.log('Funcionando Onload Post Render Trigger'); //SI FUNCIONA EL TRIGGER
 		// Funciona unicamente cuando se carga por primera vez el documento y aplica unicamente para el form y no childtables
@@ -1158,59 +1205,121 @@ frappe.ui.form.on("Sales Invoice", {
 		// en-US: Enabling event listeners for child tables
 		// es-GT: Habilitando escuchadores de eventos en las tablas hijas del tipo de documento principal
 		frm.fields_dict.items.grid.wrapper.on('click', 'input[data-fieldname="item_code"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("Click on the field Item Code");
+			//console.log("Click on the field Item Code");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
+		    $.each(frm.doc.items || [], function (i, d) {
+				console.log("Si funciona el verificador de existencia de algo en items");
+			});
 		});
-		frm.fields_dict.items.grid.wrapper.on('keyup', 'input[data-fieldname="item_code"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("A key was released from the Item Code Field");
+		// No corra KEY UP, KEY PRESS, KEY DOWN en este campo!
+		/*frm.fields_dict.items.grid.wrapper.on('', 'input[data-fieldname="item_code"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("Now pressing on the Item Code Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
+		});*/
+		frm.fields_dict.items.grid.wrapper.on('blur', 'input[data-fieldname="item_code"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("Now blurring from the Item Code Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
 		});
-		frm.fields_dict.items.grid.wrapper.on('mouseenter', 'input[data-fieldname="item_code"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("The mouse entered the Item Code Field");
+		// Item Code field update when mouse leaves. Just leave it to blur, otherwise data might be replaced unkowingly.
+		/*frm.fields_dict.items.grid.wrapper.on('mouseleave', 'input[data-fieldname="item_code"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("The mouse left the Item Code Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
+		}); */
+		frm.fields_dict.items.grid.wrapper.on('click', 'input[data-fieldname="uom"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("Click on the UOM field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
 		});
-		frm.fields_dict.items.grid.wrapper.on('click', 'input[data-fieldname="qty"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("Click on the Quantity field");
+		frm.fields_dict.items.grid.wrapper.on('blur', 'input[data-fieldname="qty"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("Blurring from the Quantity Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
 		});
-		frm.fields_dict.items.grid.wrapper.on('keyup', 'input[data-fieldname="qty"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("A key was released from the Quantity Field");
+		// Quantity field update when mouse leaves. Just leave it to blur, otherwise data might be replaced unkowingly.
+		/*frm.fields_dict.items.grid.wrapper.on('mouseleave', 'input[data-fieldname="qty"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("The mouse left the Quantity Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
+		});*/
+		frm.fields_dict.items.grid.wrapper.on('blur', 'input[data-fieldname="uom"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("Blurring from the UOM Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
 		});
-		frm.fields_dict.items.grid.wrapper.on('mouseenter', 'input[data-fieldname="qty"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("The mouse entered the Quantity Field");
+		// UOM field update when mouse leaves. Just leave it to blur, otherwise data might be replaced unkowingly.
+		/*frm.fields_dict.items.grid.wrapper.on('mouseleave', 'input[data-fieldname="uom"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("The mouse left the UOM Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
+		});*/
+		frm.fields_dict.items.grid.wrapper.on('blur', 'input[data-fieldname="conversion_factor"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("Blurring from the Conversion Factor Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
+			// Running it twice, does not help to clear the variables our when calculating based on new conversion factor. It lags. FIXME
+			//fields_dict.items.wrapper.innerText or FIXME
+			//fields_dict.items.$wrapper.innerText FIXME
+			// find a way to realod this wrapper once more, so that proper data is set with innerHTML. FIXME
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
 		});
-		
+		// Conversion Factor field update when mouse leaves. Just leave it to blur, otherwise data might be replaced unkowingly.
+		/*frm.fields_dict.items.grid.wrapper.on('mouseleave', 'input[data-fieldname="conversion_factor"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("The mouse left the Conversion Factor Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
+		});*/
+		frm.fields_dict.items.grid.wrapper.on('blur', 'input[data-fieldname="rate"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("Blurring from the Rate Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
+		});
+		// Rate field update when mouse leaves. Just leave it to blur, otherwise data might be replaced unkowingly.
+		/*frm.fields_dict.items.grid.wrapper.on('mouseleave', 'input[data-fieldname="rate"][data-doctype="Sales Invoice Item"]', function(e) {
+			console.log("The mouse left the Rate Field");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
+		});*/
 		// en-US: Enabling event listeners in the main doctype
 		// es-GT: Habilitando escuchadores de eventos en el tipo de documento principal
-		cur_frm.fields_dict.customer.$input.on('focus', function(evt){
+		/*cur_frm.fields_dict.customer.$input.on('focus', function(evt){
 			console.log("Se hizo click en el campo");
-		});
-		cur_frm.fields_dict.customer.$input.on("mouseenter", function(evt){
+		});*/
+		/*cur_frm.fields_dict.customer.$input.on('focus', function(evt){
+			console.log("Se hizo click en el campo");
+		});*/
+		/*cur_frm.fields_dict.customer.$input.on("mouseenter", function(evt){
 			console.log("Puntero de Ratón Entro en el campo");
+		});*/
+		// When ANY key is in pressed position, except SHIFT, Fn, Caps Lock
+		/*cur_frm.fields_dict.customer.$input.on("keypress", function(evt){
+			console.log("Se esta presionando una tecla");
+		});*/
+		// When ANY key is released after being pressed
+		cur_frm.fields_dict.customer.$input.on("keyup", function(evt){
+			console.log("Se acaba de soltar una tecla del campo customer");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
+			refresh_field('qty');
 		});
 		// When mouse leaves the field
 		cur_frm.fields_dict.customer.$input.on("mouseleave", function(evt){
-			console.log("Puntero de Ratón Salió del campo");
+			console.log("Puntero de Ratón Salió del campo customer");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
 		});
-		// When ANY key is in pressed position, except SHIFT, Fn, Caps Lock
-		cur_frm.fields_dict.customer.$input.on("keypress", function(evt){
-			console.log("Se esta presionando una tecla");
+		// Blur from the field
+		cur_frm.fields_dict.customer.$input.on("blur", function(evt){
+			console.log("Campo customer perdió el enfoque, saliendo del campo...");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
 		});
-		// When ANY key is released after being pressed
-		cur_frm.fields_dict.customer.$input.on("keyup", function(evt){
-			console.log("Se acaba de soltar una tecla");
-			// Antes esto estaba en un trigger de
-	        this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
-	        console.log("If you can see this, tax rate variable now exists, based on customer input and its set to: " + this_company_sales_tax_var);
-	        refresh_field('qty');
+		// Focusout from the field
+		cur_frm.fields_dict.customer.$input.on("focusout", function(evt){
+			console.log("Campo customer perdió el enfoque via focusout");
+			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
 		});
-		cur_frm.fields_dict.items.$wrapper.on("mouseenter", function(evt){
-			console.log("Puntero de Ratón Entro en el campo Items");
+		// Mouse moves over the items field   WORKS OK!
+		/*cur_frm.fields_dict.items.$wrapper.on("mousemove", function(evt){
+			console.log("Puntero de Ratón se movio en el campo Items");
+		});*/
+		// Key is released from any field within items child table. WORKS OK!
+		/*cur_frm.fields_dict.items.$wrapper.on("keyup", function(evt){
+			console.log("Se solto una tecla en el campo de items");
+		});*/
+		// Mouse clicks over the items field
+		cur_frm.fields_dict.items.$wrapper.on("click", function(evt){
+			console.log("Puntero de Ratón hizo click en el campo Items");
 		});
 		/*cur_frm.body.$input.on("mousemove", function(evt){
 			console.log("Mousemove sobre el body de la pagina");
-		});
-		cur_frm.fields_dict.customer.$input.on("focus", function(evt){
-			console.log("Si se habilito el listener al hacer focus en el campo");
-		});
-		cur_frm.fields_dict.customer.$input.on("focus", function(evt){
-			console.log("Si se habilito el listener al hacer focus en el campo");
 		});*/
     },
 	customer: function (frm, cdt, cdn) {
