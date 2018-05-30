@@ -373,6 +373,7 @@ function facelec_tax_calc_new(frm, cdt, cdn) {
 // Sin necesidad de guardar el formulario.  Esto costo una buenas horas de trabajo!!
 // Se lanza con un evento disparado por un escuchador
 // FIXME: Lo unico es que solo se puede poner item code con ENTER o CLICK. Tab no funciona.  Quizas aqui si sirve usar un listener de keypress para guardarlo en una variable que lo hace permanecer mientras se escribe el item.
+// Esto soluciona el issue #18
 function each_item(frm, cdt, cdn){
 	// es-GT: Esta permite ya que se calcule correctamente desde el INICIO!
 	// es-GT: Sin necesidad de Guardar antes!
