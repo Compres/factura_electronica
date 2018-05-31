@@ -227,16 +227,16 @@ function facelec_tax_calculation_conversion(frm, cdt, cdn) {
 /*	1.1a es-GT: Calculos y Conversiones de impuestos EMPIEZA -------------------------*/
 // Funcion para los calculos necesarios.
 function facelec_tax_calc_new(frm, cdt, cdn) {
-    // es-GT: Actualiza los datos en los campos de la tabla hija 'items'
-	console.log("Running the new tax calc function!");
-    // es-GT: Revisamos si ya quedo cargado y definido el rate (tasa) de impuesto en el DocType, el cual debe estar en la fila 0 de Sales Taxes & Charges.
+	// es-GT: Actualiza los datos en los campos de la tabla hija 'items'
+	console.log("ran facelec_tax_calc_new");
+	// es-GT: Revisamos si ya quedo cargado y definido el rate (tasa) de impuesto en el DocType, el cual debe estar en la fila 0 de Sales Taxes & Charges.
 	// es-GT: Si no ha sido definido, no se hace nada. Si ya fue definido, se asigna a una variable el valor que encuentre en la fila 0 de la tabla hija taxes.
 	if (typeof(cur_frm.doc.taxes[0].rate) == "undefined" ) {
 		//console.log("No se ha cargado impuesto, asi que no se hace nada.");
 	} else {
 		//console.log("Ahora que ya se especifico un cliente, ya existe impuesto en la hoja, por lo tanto, lo asignamos a una variable!");
 		this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
-		console.log("El IVA cargado es: " + this_company_sales_tax_var);
+		//console.log("El IVA cargado es: " + this_company_sales_tax_var);
 	}
 	// es-GT: Ahora se hace con un event listener al primer teclazo del campo de cliente
 	// es-GT: Sin embargo queda aqui para asegurar que el valor sea el correcto en todo momento.
@@ -1285,18 +1285,12 @@ frappe.ui.form.on("Sales Invoice", {
 		// FIXME FIXME FIXME
 		// Objetivo, cuando se salga del campo mediante TAB, que quede registrado el producto.
 		// estrategia 1:  Focus al campo de quantity?  NO SIRVE.  Como que hay OTRO campo antes, quizas la flechita de link?
-		
 		frm.fields_dict.items.grid.wrapper.on('click focusout blur', 'input[data-fieldname="item_code"][data-doctype="Sales Invoice Item"]', function(e) {
 			//console.log("Clicked on the field Item Code");
 			each_item(frm, cdt, cdn);
-			//facelec_tax_calc_new(frm, cdt, cdn);
-			// setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn); }, 100);
+			facelec_tax_calc_new(frm, cdt, cdn);
 		});
-		
-				/*frm.fields_dict.items.grid.wrapper.on('focusout', 'input[data-fieldname="item_code"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("Now pressing on the Item Code Field");
-			//each_item(frm, cdt, cdn);
-		});*/
+
 			// FIXME NO FUNCIONA CON TAB, SOLO HACIENDO CLICK Y ENTER.  Si se presiona TAB, SE BORRA!
 		/*frm.fields_dict.items.grid.wrapper.on('blur', 'input[data-fieldname="item_code"][data-doctype="Sales Invoice Item"]', function(e) {
 			console.log("Blurred away from the Item Code Field");
@@ -1338,16 +1332,6 @@ frappe.ui.form.on("Sales Invoice", {
 			console.log("Mouse leaving from the Quantity Field");
 			facelec_tax_calc_new(frm, cdt, cdn);
 		});
-		// Quantity field update when mouse leaves. Just leave it to blur, otherwise data might be replaced unkowingly.
-		/*frm.fields_dict.items.grid.wrapper.on('mouseleave', 'input[data-fieldname="qty"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("The mouse left the Quantity Field");
-			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
-		});*/
-		// UOM field update when mouse leaves. Just leave it to blur, otherwise data might be replaced unkowingly.
-		/*frm.fields_dict.items.grid.wrapper.on('mouseleave', 'input[data-fieldname="uom"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("The mouse left the UOM Field");
-			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
-		});*/
 		// DO NOT USE Keyup, ??  FIXME FIXME FIXME FIXME FIXME  este hace calculos bien
 		frm.fields_dict.items.grid.wrapper.on('blur focusout', 'input[data-fieldname="conversion_factor"][data-doctype="Sales Invoice Item"]', function(e) {
 			console.log("Blurring or focusing out from the Conversion Factor Field");
@@ -1371,21 +1355,11 @@ frappe.ui.form.on("Sales Invoice", {
 			facelec_tax_calc_new(frm, cdt, cdn);
 			cur_frm.refresh_field("conversion_factor");
 		});
-		// Conversion Factor field update when mouse leaves. Just leave it to blur, otherwise data might be replaced unkowingly.
-		/*frm.fields_dict.items.grid.wrapper.on('mouseleave', 'input[data-fieldname="conversion_factor"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("The mouse left the Conversion Factor Field");
-			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
-		});*/
 		frm.fields_dict.items.grid.wrapper.on('blur', 'input[data-fieldname="rate"][data-doctype="Sales Invoice Item"]', function(e) {
 			console.log("Blurring from the Rate Field");
 			each_item(frm, cdt, cdn);
 			//setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
 		});
-		// Rate field update when mouse leaves. Just leave it to blur, otherwise data might be replaced unkowingly.
-		/*frm.fields_dict.items.grid.wrapper.on('mouseleave', 'input[data-fieldname="rate"][data-doctype="Sales Invoice Item"]', function(e) {
-			console.log("The mouse left the Rate Field");
-			setTimeout(function() { facelec_tax_calc_new(frm, cdt, cdn) }, 100);
-		});*/
 		// en-US: Enabling event listeners in the main doctype
 		// es-GT: Habilitando escuchadores de eventos en el tipo de documento principal
 		// When ANY key is released after being pressed
