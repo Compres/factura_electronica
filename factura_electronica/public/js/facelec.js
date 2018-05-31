@@ -1388,19 +1388,6 @@ frappe.ui.form.on("Sales Invoice", {
 		});*/
 		// en-US: Enabling event listeners in the main doctype
 		// es-GT: Habilitando escuchadores de eventos en el tipo de documento principal
-		/*cur_frm.fields_dict.customer.$input.on('focus', function(evt){
-			console.log("Se hizo click en el campo");
-		});*/
-		/*cur_frm.fields_dict.customer.$input.on('focus', function(evt){
-			console.log("Se hizo click en el campo");
-		});*/
-		/*cur_frm.fields_dict.customer.$input.on("mouseenter", function(evt){
-			console.log("Puntero de Ratón Entro en el campo");
-		});*/
-		// When ANY key is in pressed position, except SHIFT, Fn, Caps Lock
-		/*cur_frm.fields_dict.customer.$input.on("keypress", function(evt){
-			console.log("Se esta presionando una tecla");
-		});*/
 		// When ANY key is released after being pressed
 		cur_frm.fields_dict.customer.$input.on("keyup", function(evt){
 			console.log("Se acaba de soltar una tecla del campo customer");
