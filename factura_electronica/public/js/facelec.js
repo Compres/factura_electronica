@@ -101,135 +101,6 @@ Esta organizado en dos principales secciones: Una para funciones, otra para disp
 
 /*	1 en-US: Functions BEGIN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 /*	1 es-GT: Funciones EMPIEZAN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-
-/*	1.1 en-US: Tax Calculation Conversions BEGIN -------------------------------------*/
-/*	1.1 es-GT: Calculos y Conversiones de impuestos EMPIEZA --------------------------*/
-// Funcion para los calculos necesarios.
-function facelec_tax_calculation_conversion(frm, cdt, cdn) {
-    // es-GT: Actualiza los datos en los campos de la tabla hija 'items'
-    refresh_field('items');
-
-    // es-GT: Se asigna a la variable el valor que encuentre en la fila 0 de la tabla hija taxes
-    this_company_sales_tax_var = cur_frm.doc.taxes[0].rate;
-
-    console.log("If you can see this, tax rate variable now exists, and its set to: " + this_company_sales_tax_var);
-
-    var this_row_qty, this_row_rate, this_row_amount, this_row_conversion_factor, this_row_stock_qty, this_row_tax_rate, this_row_tax_amount, this_row_taxable_amount;
-
-    // es-GT: Esta funcion permite trabajar linea por linea de la tabla hija items
-    frm.doc.items.forEach((item_row, index) => {
-        if (item_row.name == cdn) {
-			// first we calculate the amount total for this row and assign it to a variable
-            this_row_amount = (item_row.qty * item_row.rate);
-			// Now, we get the quantity in terms of stock quantity by multiplying by conversion factor
-			//OLD Method
-            //this_row_stock_qty = (item_row.qty * item_row.conversion_factor);
-			// NEW Method
-			this_row_stock_qty = item_row.stock_qty
-			// We then assign the tax rate per stock UOM to a variable
-            this_row_tax_rate = (item_row.facelec_tax_rate_per_uom);
-			// We calculate the total amount of excise or special tax based on the stock quantity and tax rate per uom variables above.
-			//OLD METHOD
-            //this_row_tax_amount = (this_row_stock_qty * this_row_tax_rate);
-			//NEW Method
-			this_row_tax_amount = (item_row.stock_qty * item_row.facelec_tax_rate_per_uom);
-			// We then estimate the remainder taxable amount for which Other ERPNext configured taxes will apply.
-            this_row_taxable_amount = (this_row_amount - this_row_tax_amount);
-			// We change the fields for other tax amount as per the complete row taxable amount.
-			// Old version, uncomment in case items do not work properly.
-			//frm.doc.items[index].facelec_other_tax_amount = ((item_row.facelec_tax_rate_per_uom * (item_row.qty * item_row.conversion_factor)));
-			frm.doc.items[index].facelec_other_tax_amount = this_row_taxable_amount;
-			//OJO!  No se puede utilizar stock_qty en los calculos, debe de ser qty a puro tubo!
-			// Old version, uncomment in case items do not work properly.
-			//frm.doc.items[index].facelec_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - ((item_row.qty * item_row.conversion_factor) * item_row.facelec_tax_rate_per_uom));
-			//OLD 2
-			//frm.doc.items[index].facelec_amount_minus_excise_tax = this_row_taxable_amount;
-			// NEW
-			console.log("new calulation")
-			frm.refresh_field("items")
-			frm.doc.items[index].facelec_amount_minus_excise_tax = ((item_row.qty * item_row.rate) - (item_row.stock_qty * item_row.facelec_tax_rate_per_uom));
-            console.log("uom that just changed is: " + item_row.uom);
-            console.log("stock qty is: " + item_row.stock_qty); // se queda con el numero anterior.  multiplicar por conversion factor (si existiera!)
-            // Por alguna razón esta multiplicando y obteniendo valores negativos  FIXME
-			// absoluto? FIXME
-			// Que sucedera con una nota de crédito? FIXME
-			// Absoluto y luego NEGATIVIZADO!? FIXME
-			// Any way to run the function TWICE?
-            console.log("conversion_factor is: " + item_row.conversion_factor);
-
-            // Verificacion Individual para verificar si es Fuel, Good o Service
-            if (item_row.factelecis_fuel == 1) {
-                //console.log("The item you added is FUEL!" + item_row.facelec_is_good);// WORKS OK!
-                // Estimamos el valor del IVA para esta linea
-                //frm.doc.items[index].facelec_sales_tax_for_this_row = (item_row.facelec_amount_minus_excise_tax * (1 + (this_company_sales_tax_var / 100))).toFixed(2);
-                //frm.doc.items[index].facelec_gt_tax_net_fuel_amt = (item_row.facelec_amount_minus_excise_tax - item_row.facelec_sales_tax_for_this_row).toFixed(2);
-                frm.doc.items[index].facelec_gt_tax_net_fuel_amt = (item_row.facelec_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_sales_tax_for_this_row = (item_row.facelec_gt_tax_net_fuel_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check combustibles
-                total_fuel = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    // total_qty += flt(d.qty);
-                    if (d.factelecis_fuel == true) {
-                        total_fuel += flt(d.facelec_gt_tax_net_fuel_amt);
-                    };
-                });
-                //console.log("El total neto de fuel es:" + total_fuel); // WORKS OK!
-                frm.doc.facelec_gt_tax_fuel = total_fuel;
-                frm.refresh_field("factelecis_fuel");
-            };
-            if (item_row.facelec_is_good == 1) {
-                //console.log("The item you added is a GOOD!" + item_row.facelec_is_good);// WORKS OK!
-                //console.log("El valor en bienes para el libro de compras es: " + net_goods_tally);// WORKS OK!
-                // Estimamos el valor del IVA para esta linea
-                //frm.doc.items[index].facelec_sales_tax_for_this_row = (item_row.facelec_amount_minus_excise_tax * (this_company_sales_tax_var / 100)).toFixed(2);
-                //frm.doc.items[index].facelec_gt_tax_net_goods_amt = (item_row.facelec_amount_minus_excise_tax - item_row.facelec_sales_tax_for_this_row).toFixed(2);
-                frm.doc.items[index].facelec_gt_tax_net_goods_amt = (item_row.facelec_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_sales_tax_for_this_row = (item_row.facelec_gt_tax_net_goods_amt * (this_company_sales_tax_var / 100));
-                // Sumatoria de todos los que tengan el check bienes
-                total_goods = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    // total_qty += flt(d.qty);
-                    if (d.facelec_is_good == true) {
-                        total_goods += flt(d.facelec_gt_tax_net_goods_amt);
-                    };
-                });
-                //console.log("El total neto de bienes es:" + total_goods);// WORKS OK!
-                frm.doc.facelec_gt_tax_goods = total_goods;
-            };
-            if (item_row.facelec_is_service == 1) {
-                //console.log("The item you added is a SERVICE!" + item_row.facelec_is_service);// WORKS OK!
-                //console.log("El valor en servicios para el libro de compras es: " + net_services_tally);// WORKS OK!
-                // Estimamos el valor del IVA para esta linea
-                //frm.doc.items[index].facelec_sales_tax_for_this_row = (item_row.facelec_amount_minus_excise_tax * (this_company_sales_tax_var / 100)).toFixed(2);
-                //frm.doc.items[index].facelec_gt_tax_net_services_amt = (item_row.facelec_amount_minus_excise_tax - item_row.facelec_sales_tax_for_this_row).toFixed(2);
-                frm.doc.items[index].facelec_gt_tax_net_services_amt = (item_row.facelec_amount_minus_excise_tax / (1 + (this_company_sales_tax_var / 100)));
-                frm.doc.items[index].facelec_sales_tax_for_this_row = (item_row.facelec_gt_tax_net_services_amt * (this_company_sales_tax_var / 100));
-
-                total_servi = 0;
-                $.each(frm.doc.items || [], function (i, d) {
-                    if (d.facelec_is_service == true) {
-                        total_servi += flt(d.facelec_gt_tax_net_services_amt);
-                    };
-                });
-                // console.log("El total neto de servicios es:" + total_servi); // WORKS OK!
-                frm.doc.facelec_gt_tax_services = total_servi;
-            };
-
-            // Para el calculo total de IVA, basado en la sumatoria de facelec_sales_tax_for_this_row de cada item
-            full_tax_iva = 0;
-            $.each(frm.doc.items || [], function (i, d) {
-                full_tax_iva += flt(d.facelec_sales_tax_for_this_row);
-            });
-            frm.doc.facelec_total_iva = full_tax_iva;
-        };
-    });
-}
-/*	1.1 en-US: Tax Calculation Conversions END ---------------------------------------*/
-/*	1.1 es-GT: Calculos y Conversiones de impuestos TERMINA --------------------------*/
-
-/*	1.1a en-US: Tax Calculation Conversions BEGIN ------------------------------------*/
-/*	1.1a es-GT: Calculos y Conversiones de impuestos EMPIEZA -------------------------*/
-// Funcion para los calculos necesarios.
 function facelec_tax_calc_new(frm, cdt, cdn) {
 	// es-GT: Actualiza los datos en los campos de la tabla hija 'items'
 	//console.log("ran facelec_tax_calc_new");
@@ -343,11 +214,15 @@ function facelec_tax_calc_new(frm, cdt, cdn) {
         };
     });
 }
-/*	1.1a en-US: Tax Calculation Conversions END --------------------------------------*/
-/*	1.1a es-GT: Calculos y Conversiones de impuestos TERMINA -------------------------*/
+/*	1.1 en-US: Tax Calculation Conversions BEGIN -------------------------------------*/
+/*	1.1 es-GT: Calculos y Conversiones de impuestos EMPIEZA --------------------------*/
+// Funcion para los calculos necesarios.
 
-/*	1.1b en-US: Item refreshing calculations BEGIN -----------------------------------*/
-/*	1.1b es-GT: Calculos para refrescar articulos EMPIEZA ----------------------------*/
+/*	1.1 en-US: Tax Calculation Conversions END ---------------------------------------*/
+/*	1.1 es-GT: Calculos y Conversiones de impuestos TERMINA --------------------------*/
+
+/*	1.1a en-US: Item refreshing calculations BEGIN -----------------------------------*/
+/*	1.1a es-GT: Calculos para refrescar articulos EMPIEZA ----------------------------*/
 // Esta función refresca los valores de las filas para tener los calculos completos
 // Sin necesidad de guardar el formulario.  Esto costo una buenas horas de trabajo!!
 // Se lanza con un evento disparado por un escuchador
@@ -376,13 +251,15 @@ function each_item(frm, cdt, cdn){
 			console.log("El IVA ya sin el iva del descuento es ahora:" + frm.doc.facelec_total_iva);
 		}
 		facelec_tax_calc_new(frm, "Sales Invoice Item", item.name);
-		facelec_tabla_tax(frm, "Sales Invoice Item", item.name);
+		facelec_sales_taxes_charges_row(frm, "Sales Invoice Item", item.name);
 	});
 }
-/*	1.1b en-US: Item refreshing calculations END -------------------------------------*/
-/*	1.1b es-GT: Calculos para refrescar articulos TERMINA ----------------------------*/
+/*	1.1a en-US: Item refreshing calculations END -------------------------------------*/
+/*	1.1a es-GT: Calculos para refrescar articulos TERMINA ----------------------------*/
 
-function facelec_tabla_tax(frm, cdt, cdn){
+/* 1.1b en-US: Add rows, accounts and totalize taxes BEGIN ---------------------------*/
+/* 1.1b es-GT: Agregar fila, cuentas y totalizar impuestos en tabla EMPIEZA ----------*/
+function facelec_sales_taxes_charges_row(frm, cdt, cdn){
     var this_row_qty = 0;
 	var this_row_rate = 0;
 	var this_row_amount = 0;
@@ -395,77 +272,44 @@ function facelec_tabla_tax(frm, cdt, cdn){
 	var total_goods = 0;
 	var total_servi = 0;
 	
-	frm.doc.items.forEach((item_row, index) => {
-		if (item_row.name == cdn) {
-			var cuenta = item_row.facelec_tax_rate_per_uom_account;
-			this_row_tax_amount = (item_row.stock_qty * item_row.facelec_tax_rate_per_uom);
-			this_row_taxable_amount = (item_row.amount - (item_row.stock_qty * item_row.facelec_tax_rate_per_uom));
-			console.log("NUEVA: Valor con iva contiene: Q" + (item_row.amount - (item_row.stock_qty * item_row.facelec_tax_rate_per_uom)));
-			console.log("NUEVA: Monto otro impuesto: = Q" + (item_row.stock_qty * item_row.facelec_tax_rate_per_uom));
+	frm.doc.items.forEach((item_row_i, index_i) => {
+		if (item_row_i.name == cdn) {
+			var cuenta = item_row_i.facelec_tax_rate_per_uom_account;
+			//console.log("NUEVA: La cuenta es: " + cuenta); // WORKS OK
+			this_row_tax_amount = (item_row_i.stock_qty * item_row_i.facelec_tax_rate_per_uom);
+			this_row_taxable_amount = (item_row_i.amount - (item_row_i.stock_qty * item_row_i.facelec_tax_rate_per_uom));
+			//console.log("NUEVA: Valor con iva contiene: Q" + (item_row.amount - (item_row.stock_qty * item_row.facelec_tax_rate_per_uom))); //WORKS OK
+			//console.log("NUEVA: Monto otro impuesto: = Q" + (item_row.stock_qty * item_row.facelec_tax_rate_per_uom)); //WORKS OK
 			// IMPORTANTE:  Se debe de calcular Justo a Tiempo, no depende obtener datos de campos cuyos valores todavía no han sido asignados.
 			// We change the fields for other tax amount as per the complete row taxable amount.
 			// We refresh the items to recalculate everything to ensure proper math
-			frm.refresh_field("items");
-			frm.refresh_field("conversion_factor");
-			// Verificacion de si existe la cuenta!
+			frm.refresh_field('items');
+			frm.refresh_field('conversion_factor');
+			// Verificacion si existe la cuenta en la tabla de items.
 			if (cuenta !== null) {
-				// Aqui busca las filas de items que tengan cuenta.
-				if (buscar_account(frm, cuenta)) {
+				// Si si existe, entonces corre esto
+				console.log("NUEVA: La cuenta se detecto en Items: " + cuenta); // WORKS OK
+				if (buscar_account(frm, cuenta)) {  
 					console.log('La cuenta de impuestos y cargos ya existe en la tabla Taxes and Charges');
 					// Estimar el rate basado en lo que ya existe, para que CUADRE!
-					// FIXME FIXME FIXME FIXME FIXME
 					otro_impuesto = this_row_tax_amount;
-					console.log("El otro monto de impuesto es, cuando la cuenta ya existe es: " + otro_impuesto);
-					
-					/* FIXME FIXME FIXME FIXME FIXME FIXME 
-					ITERAR EN LA FILA ENCONTRADA PARA AGREGAR LOS DATOS EN LOS ELEMENTOS
-					*/
-					if (tax_row.account_head == undefined) {
-						otro_impuesto = this_row_tax_amount;
-						valor_con_iva = this_row_taxable_amount;
-						// Buscamos en el server, pasandole la cuenta configurada en Items, para obtener, con validación la cuenta que esta configurado.
-						// Esto nos asegura doblemente! que la cuenta que estamos agregando, EXISTA configurada en el Item, y por lo tanto, como ya se configuro en Item previament,e ya paso UN nivel de validación, asegurando su existencia en el sistema.
-						// Evaluar no dejar guardar o validar la factura si no ha sido indicada una cuenta contable en la tabla de impuestos.
-						frappe.call({
-							method: "factura_electronica.api.get_data_tax_account",
-							args: {
-								name_account_tax_gt: cuenta
-							},
-							// El callback recibe como parametro el dato retornado por script python del lado del servidor. La variable definida despues de callback en el function, es una variable dummy. La variable dummy sirve para adjuntarle despues el metodo para accesar la data que ella contiene!
-							callback: function (data) {
-								// Asigna los valores retornados del servidor
-								// Asigna la cuenta que acabmos de encontrar a la fila.
-								frm.doc.taxes[index].account_head = cuenta;
-								// TODO: Se hace un estimado como "On Net Total" con impuesto incluido, para que el rate logre cuadrar el monto del impuesto. Este "rate" sera un precursor que estamos usando de muleta, mientras logramos modificar la aplicacion core!
-								frm.doc.taxes[index].charge_type = 'On Net Total'; // Opcion 1: Actual, Opcion 2: On Net Total, Opcion 3: On Previous Row Amount, Opcion 4: On Previous Row Total
-								// En el caso de Impuestos especiales en Guate, estan incluidos, asi que aseguramos que la caja tenga 1 o "si".
-								frm.doc.taxes[index].included_in_print_rate = 1 ;
-								// ojo ojo ojo ojo FIXME FIXME FIXME  TODO TODO
-								// 1. Valor de IDP de la fila de items se asigna acumuladamente a cada fila de cuenta en el sales taxes & charges.
-								// 2. Valor Neto sin IVA de la Fila de items se asigna acumuladamente a cada fila de cuenta en el sales taxes & charges
-								// Como fix temporal, intentaremos estimar un "rate" el cual finalice en un numero que permite que el "amount" sea el correcto, cuando se usa On Net Total, puesto que de esta forma podemos lelgar a obtener el resultado esperado de contabilizar correctamente el IDP, sin necesidad de modificar el software.  Esto es un fix paliativo.
-								frm.doc.taxes[index].rate = (otro_impuesto / (valor_con_iva / (1 + 12))); //4600 / 20000
-								// Una breve descripción
-								con
-								frm.doc.taxes[index].description = 'Impuesto';
-								// Esto es en caso le querramos colocar monto, pero OJO, porque no se pueden poner montos que esten incluidos. Ver abajo.
-								//frm.doc.taxes[index].tax_amount = '39.99';
-								//frm.doc.taxes[index].rate = data.message;
-								//refresh_field("taxes");
-							 								}
-						});
+					valor_con_iva = this_row_taxable_amount;
+					if (valor_con_iva == 0) {
+						console.log("NUEVA: Valor con IVA es 0");
+					} else {
+						console.log(" NUEVA: El valor con IVA, cuando la cuenta ya existe es: " + valor_con_iva);
+						// Aqui podemos correr el codigo de iterar por la fila y revisar.
 					}
-					
-					/**/
-				} else {
-					console.log('La cuenta no existe, se agregara una nueva fila en taxes');
-					// Aqui le indicamos que agregue una fila o un hijo de impuestos al campo Taxes
-					// Talvez es necesario poner read only al campo cur_frm.doc.taxes_and_charges
-					frappe.model.add_child(frm.doc, "Sales Taxes and Charges", "taxes");
-					// Ahora iteramos dentro de la tabla de Sales Taxes and Charges
+					if (otro_impuesto == 0){
+						//console.log("NUEVA: Valor del impuesto es 0");
+						// No hacer NADA.
+					} else {
+						//console.log("NUEVA: El otro monto de impuesto es, cuando la cuenta ya existe es: " + otro_impuesto);
+						// Aqui es mejor no hacer nada, porque el otro impuesto pudiera valer 0!
+					}
+					// Aqui busca las filas de items que tengan cuenta.
 					frm.doc.taxes.forEach((tax_row, index) => {
-						// Como la fila que se acaba de agregar NO TIENE CUENTA, logicamente la PRIMERA sera true porque esta vacia.
-						if (tax_row.account_head == undefined) {
+						if (tax_row.account_head == cuenta) {
 							otro_impuesto = this_row_tax_amount;
 							valor_con_iva = this_row_taxable_amount;
 							// Buscamos en el server, pasandole la cuenta configurada en Items, para obtener, con validación la cuenta que esta configurado.
@@ -491,102 +335,66 @@ function facelec_tabla_tax(frm, cdt, cdn){
 									// Como fix temporal, intentaremos estimar un "rate" el cual finalice en un numero que permite que el "amount" sea el correcto, cuando se usa On Net Total, puesto que de esta forma podemos lelgar a obtener el resultado esperado de contabilizar correctamente el IDP, sin necesidad de modificar el software.  Esto es un fix paliativo.
 									frm.doc.taxes[index].rate = (otro_impuesto / (valor_con_iva / (1 + 12))); //4600 / 20000
 									// Una breve descripción
-									con
+									console.log("El rate para colocar es:" + (otro_impuesto / (valor_con_iva / (1 + 12))));
 									frm.doc.taxes[index].description = 'Impuesto';
 									// Esto es en caso le querramos colocar monto, pero OJO, porque no se pueden poner montos que esten incluidos. Ver abajo.
 									//frm.doc.taxes[index].tax_amount = '39.99';
 									//frm.doc.taxes[index].rate = data.message;
 									//refresh_field("taxes");
-								 								}
+								}
 							});
-						}
-					});
-				}
-			} else {
-				console.log('El producto seleccionado no tiene una cuenta asociada');
-			}
-		};
-	});
-}
-
-/* 1.1c en-US: Add rows, accounts and totalize taxes BEGIN ---------------------------*/
-/* 1.1c es-GT: Agregar fila, cuentas y totalizar impuestos en tabla EMPIEZA ----------*/
-// CASI OBSOLETA
-function facelec_sales_taxes_charges_row(frm, cdt,cdn){
-	// Eleccion de este trigger para la adicion de filas en taxes con sus respectivos valores.
-	/*
-	
-	console.log("Otro impuesto contiene:" + otro_impuesto);
-	
-	para_rate = (otro_impuesto / (valor_con_iva / (1 + 12)))
-	console.log("La variable para rate contiene: " + para_rate);*/
-
-	frm.doc.items.forEach((item_row_i, index_i) => {
-		if (item_row_i.name == cdn) {
-			var cuenta = item_row_i.facelec_tax_rate_per_uom_account;
-			console.log("La cuenta de la fila es la siguiente: " + cuenta);
-			otro_impuesto = item_row_i.other_tax_amount;
-			console.log("El otro monto de impuesto es: " + otro_impuesto);
-			valor_con_iva = item_row_i.facelec_amount_minus_excise_tax;
-			console.log("Valor con iva contiene:" + valor_con_iva);
-			if (cuenta !== null) {
-				// Aqui busca las filas de items que tengan cuenta.
-				if (buscar_account(frm, cuenta)) {
-					console.log('La cuenta de impuestos y cargos ya existe en la tabla Taxes and Charges');
-					// Estimar el rate basado en lo que ya existe, para que CUADRE!
-					// FIXME FIXME FIXME FIXME FIXME
+						} // TERMINA if else (tax_row.account_head == undefined) 
+					}); // TERMINA frm.doc.taxes.forEach((tax_row, index) =>
 				} else {
-					console.log('La cuenta no existe, se agregara una nueva fila en taxes');
-					otro_impuesto = item_row_i.other_tax_amount;
-					console.log("El otro monto de impuesto es, cuando la cuenta ya existe es: " + otro_impuesto);
+					console.log('NUEVA: La cuenta no existe en tabla Taxes, se agregara una nueva fila');
 					// Aqui le indicamos que agregue una fila o un hijo de impuestos al campo Taxes
-					// Talvez es necesario poner read only al campo cur_frm.doc.taxes_and_charges
+					// FIXME  FIXME:  Talvez sea necesario agregar la fila en otra verificacion, porque se estan agregando dos. Aunque si se verifica en la mera tabla.
 					frappe.model.add_child(frm.doc, "Sales Taxes and Charges", "taxes");
 					// Ahora iteramos dentro de la tabla de Sales Taxes and Charges
-					frm.doc.taxes.forEach((item_row, index) => {
+					frm.doc.taxes.forEach((tax_row, index) => {
 						// Como la fila que se acaba de agregar NO TIENE CUENTA, logicamente la PRIMERA sera true porque esta vacia.
-						if (item_row.account_head == undefined) {
+						if (tax_row.account_head == undefined) {
 							// Buscamos en el server, pasandole la cuenta configurada en Items, para obtener, con validación la cuenta que esta configurado.
 							// Esto nos asegura doblemente! que la cuenta que estamos agregando, EXISTA configurada en el Item, y por lo tanto, como ya se configuro en Item previament,e ya paso UN nivel de validación, asegurando su existencia en el sistema.
 							// Evaluar no dejar guardar o validar la factura si no ha sido indicada una cuenta contable en la tabla de impuestos.
 							frappe.call({
-								method: "factura_electronica.api.get_data_tax_account",
-								args: {
-									name_account_tax_gt: cuenta
-								},
-								// El callback recibe como parametro el dato retornado por script python del lado del servidor. La variable definida despues de callback en el function, es una variable dummy. La variable dummy sirve para adjuntarle despues el metodo para accesar la data que ella contiene!
-								callback: function (data) {
-									// Asigna los valores retornados del servidor
-									// Asigna la cuenta que acabmos de encontrar a la fila.
-									frm.doc.taxes[index].account_head = cuenta;
-									// TODO: Se hace un estimado como "On Net Total" con impuesto incluido, para que el rate logre cuadrar el monto del impuesto. Este "rate" sera un precursor que estamos usando de muleta, mientras logramos modificar la aplicacion core!
-									frm.doc.taxes[index].charge_type = 'On Net Total'; // Opcion 1: Actual, Opcion 2: On Net Total, Opcion 3: On Previous Row Amount, Opcion 4: On Previous Row Total
-									// En el caso de Impuestos especiales en Guate, estan incluidos, asi que aseguramos que la caja tenga 1 o "si".
-									frm.doc.taxes[index].included_in_print_rate = 1 ;
-									// ojo ojo ojo ojo FIXME FIXME FIXME  TODO TODO
-									// 1. Valor de IDP de la fila de items se asigna acumuladamente a cada fila de cuenta en el sales taxes & charges.
-									// 2. Valor Neto sin IVA de la Fila de items se asigna acumuladamente a cada fila de cuenta en el sales taxes & charges
-									// Como fix temporal, intentaremos estimar un "rate" el cual finalice en un numero que permite que el "amount" sea el correcto, cuando se usa On Net Total, puesto que de esta forma podemos lelgar a obtener el resultado esperado de contabilizar correctamente el IDP, sin necesidad de modificar el software.  Esto es un fix paliativo.
-									frm.doc.taxes[index].rate = (otro_impuesto / (valor_con_iva / (1 + 12))); //4600 / 20000
-									// Una breve descripción
-									frm.doc.taxes[index].description = 'Impuesto';
-									// Esto es en caso le querramos colocar monto, pero OJO, porque no se pueden poner montos que esten incluidos. Ver abajo.
-									//frm.doc.taxes[index].tax_amount = '39.99';
-									//frm.doc.taxes[index].rate = data.message;
-									//refresh_field("taxes");
-								 								}
-							});
-						}
-					});
+							method: "factura_electronica.api.get_data_tax_account",
+							args: {
+								name_account_tax_gt: cuenta
+							},
+							// El callback recibe como parametro el dato retornado por script python del lado del servidor. La variable definida despues de callback en el function, es una variable dummy. La variable dummy sirve para adjuntarle despues el metodo para accesar la data que ella contiene!
+							callback: function (data) {
+								// Asigna los valores retornados del servidor
+								// Asigna la cuenta que acabmos de encontrar a la fila.
+								frm.doc.taxes[index].account_head = cuenta;
+								// TODO: Se hace un estimado como "On Net Total" con impuesto incluido, para que el rate logre cuadrar el monto del impuesto. Este "rate" sera un precursor que estamos usando de muleta, mientras logramos modificar la aplicacion core!
+								frm.doc.taxes[index].charge_type = 'On Net Total'; // Opcion 1: Actual, Opcion 2: On Net Total, Opcion 3: On Previous Row Amount, Opcion 4: On Previous Row Total
+								// En el caso de Impuestos especiales en Guate, estan incluidos, asi que aseguramos que la caja tenga 1 o "si".
+								frm.doc.taxes[index].included_in_print_rate = 1 ;
+								// ojo ojo ojo ojo FIXME FIXME FIXME  TODO TODO
+								// 1. Valor de IDP de la fila de items se asigna acumuladamente a cada fila de cuenta en el sales taxes & charges.
+								// 2. Valor Neto sin IVA de la Fila de items se asigna acumuladamente a cada fila de cuenta en el sales taxes & charges
+								// Como fix temporal, intentaremos estimar un "rate" el cual finalice en un numero que permite que el "amount" sea el correcto, cuando se usa On Net Total, puesto que de esta forma podemos lelgar a obtener el resultado esperado de contabilizar correctamente el IDP, sin necesidad de modificar el software.  Esto es un fix paliativo.
+								frm.doc.taxes[index].rate = (otro_impuesto / (valor_con_iva / (1 + 12))); //4600 / 20000
+								console.log("El rate para colocar es:" + (otro_impuesto / (valor_con_iva / (1 + 12))));
+								// Una breve descripción
+								frm.doc.taxes[index].description = 'Impuesto';
+								// Esto es en caso le querramos colocar monto, pero OJO, porque no se pueden poner montos que esten incluidos. Ver abajo.
+								//frm.doc.taxes[index].tax_amount = '39.99';
+								//frm.doc.taxes[index].rate = data.message;
+								//refresh_field("taxes");
+							}
+							}); // Termina el Callback que verifica si la cuenta existe.
+						} // El If que corre si la cuenta no esta definida en Sales Taxes & Charges
+					}); // frm.doc.taxes.forEach((tax_row, index) => Cierra For loop que itera sobre todas las filas de la tabla de impuestos.
 				}
-			} else {
-				console.log('El producto seleccionado no tiene una cuenta asociada');
-			}
+			} // TERMINA if (cuenta !== null)
+			console.log('NUEVO: Se encontró cuenta, o simplemente se agregó');
 		}
 	});
-}  // 
-/* 1.1c en-US: Add rows, accounts and totalize taxes END -----------------------------*/
-/* 1.1c es-GT: Agregar fila, cuentas y totalizar impuestos en tabla TERMINA ----------*/
+} // OK
+/* 1.1b en-US: Add rows, accounts and totalize taxes END -----------------------------*/
+/* 1.1b es-GT: Agregar fila, cuentas y totalizar impuestos en tabla TERMINA ----------*/
 
 /*	1.2 en-US: Search Tax Account BEGIN ----------------------------------------------*/
 /*	1.2 es-GT: Busqueda de Cuenta de Impuestos EMPIEZA -------------------------------*/
@@ -1500,7 +1308,7 @@ frappe.ui.form.on("Sales Invoice", {
 			//console.log("Clicked on the field Item Code");
 			each_item(frm, cdt, cdn);
 			facelec_tax_calc_new(frm, cdt, cdn);
-			facelec_tabla_tax(frm, cdt, cdn);
+			facelec_sales_taxes_charges_row(frm, cdt, cdn);
 		});
 
 			// FIXME NO FUNCIONA CON TAB, SOLO HACIENDO CLICK Y ENTER.  Si se presiona TAB, SE BORRA!
