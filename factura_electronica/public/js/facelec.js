@@ -2615,4 +2615,3 @@ frappe.ui.form.on("Supplier Quotation Item", {
 });
 /*	2.16 en-US: Triggers for Supplier Quotation Item END -----------------------------*/
 /*	2.16 es-GT: Disparadores para Producto de Presupuesto de Proveedor TERMINA -------*/
-/**/
