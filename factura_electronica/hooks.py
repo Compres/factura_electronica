@@ -16,7 +16,7 @@ app_license = "GNU General Public License (v3)"
 # en-US: Indicates the existense of custom fields to add to existing ERPNext installation
 # fixtures = ["Custom Field", "Tax Category"]
 
-fixtures = fill_fixtures()
+# fixtures = fill_fixtures()
 
 # Includes in <head>
 # ------------------
