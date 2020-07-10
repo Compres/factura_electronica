@@ -317,11 +317,28 @@ def fill_fixtures():
         ]
     }
 
+    tax_category = {
+        "dt": "Tax Category", "filters": [
+            [
+                "title", "in", [
+                    "SAT: Agente Retenedor IVA",
+                    "SAT: Régimen Especial Contribuyente Agropecuario",
+                    "SAT: Pequeño Contribuyente",
+                    "SAT: Gasolinera",
+                    "SAT: Otros Calificados por SAT",
+                    "SAT: Contribuyente Especial",
+                    "SAT: Operador de Tarjeta de Crédito / Debito",
+                    "SAT: Entidad Publica",
+                    "SAT: Exportador"
+                ]
+            ]
+        ]
+    }
 
     # NEW FUNCTIONALITY FOR EXPORTING
     fixtures_fillup.append(custom_field)
     fixtures_fillup.append(translation)
-    fixtures_fillup.append('Tax Category')
+    fixtures_fillup.append(tax_category)
     fixtures_fillup.append('Identification Document Type')
 
     return fixtures_fillup
