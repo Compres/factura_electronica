@@ -11,6 +11,7 @@ nuevos fixtures que estes creando se agreguen al listado fixtures.
 
 """
 
+
 def fill_fixtures():
     # We declare fixtures as an empty list.
     fixtures_fillup = []
@@ -300,6 +301,25 @@ def fill_fixtures():
         "dt": "Translation", "filters": [
             [
                 "source_name", "in", [
+                    "Exporter / Supplier",
+                    "Importer / Receiver",
+                    "Declarant",
+                    "Carrier",
+                    "Total values",
+                    "Goods",
+                    "Support Documents",
+                    "Observations and Signatures",
+                    "DUCA Number",
+                    "Acceptance Date",
+                    "Reference or Serial Number",
+                    "Entry Customs Office",
+                    "Exit Custom Office",
+                    "Initial Transit Customs Office",
+                    "Purpose",
+                    "Exrpoter Identification Type and Number",
+                    "Exporter ID number",
+                    "Exporter ID type",
+                    "Exporter ID issuing contry",
                     "Public Writ",
                     "VAT Exemption Record",
                     "Consumable Acquisition Record",
@@ -325,7 +345,6 @@ def fill_fixtures():
             ]
         ]
     }
-
 
     # NEW FUNCTIONALITY FOR EXPORTING
     fixtures_fillup.append(custom_field)
