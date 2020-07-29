@@ -1,6 +1,7 @@
 {
  "autoname": "naming_series",
  "creation": "2020-07-06 17:01:47.895625",
+ "description": "Constancia de adquisici\u00f3n de insumos debe ser registrada por empresas exportadoras que deseen comprar insumos exentos de IVA.  Debe contener la informaci\u00f3n aqu\u00ed listada, as\u00ed como la siguiente leyenda:\n\n\u201cLa presente no constituye constancia de exenci\u00f3n del Impuesto al Valor Agregado\u201d",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -177,7 +178,7 @@
    "label": "CADI Authorization Resolution Date"
   }
  ],
- "modified": "2020-07-28 23:13:10.291710",
+ "modified": "2020-07-28 23:16:44.489455",
  "modified_by": "Administrator",
  "module": "Factura Electronica",
  "name": "Consumable Acquisition Record",
