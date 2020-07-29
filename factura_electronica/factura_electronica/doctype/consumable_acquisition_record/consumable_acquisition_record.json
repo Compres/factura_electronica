@@ -6,24 +6,28 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "date",
   "company",
   "tax_id",
   "company_address_name",
   "company_address_text",
+  "billing_address_name",
+  "billing_address_text",
+  "export_resolution_number",
+  "export_resolution_date",
+  "date",
+  "country_of_issue",
   "supplier",
+  "supplier_tax_id",
   "section_break",
+  "grand_total",
   "journal_entry",
   "purchase_invoice",
   "invoice_date",
-  "grand_total",
   "currency",
-  "retention_amount",
-  "consumable_acquisition_confirmation_prefix",
-  "consumable_acquisition_confirmation_no",
-  "consumable_acquisition_status",
   "consumable_acquisition_image",
-  "attach_consumable_acquisition_image"
+  "attach_consumable_acquisition_image",
+  "cadi_resolution_number",
+  "cadi_resolution_date"
  ],
  "fields": [
   {
@@ -90,26 +94,6 @@
    "options": "Currency"
   },
   {
-   "fieldname": "retention_amount",
-   "fieldtype": "Currency",
-   "label": "Consumable Acquisition Amount"
-  },
-  {
-   "fieldname": "consumable_acquisition_confirmation_prefix",
-   "fieldtype": "Data",
-   "label": "Consumable Acquisition Confirmation Prefix"
-  },
-  {
-   "fieldname": "consumable_acquisition_confirmation_no",
-   "fieldtype": "Data",
-   "label": "Consumable Acquisition Confirmation Number"
-  },
-  {
-   "fieldname": "consumable_acquisition_status",
-   "fieldtype": "Data",
-   "label": "Consumable Acquisition Status"
-  },
-  {
    "fieldname": "consumable_acquisition_image",
    "fieldtype": "Image",
    "label": "Image",
@@ -118,7 +102,7 @@
   {
    "fieldname": "attach_consumable_acquisition_image",
    "fieldtype": "Attach Image",
-   "label": "Attach Retention Image"
+   "label": "Attach CADI Image"
   },
   {
    "bold": 1,
@@ -143,9 +127,57 @@
    "label": "Company Address",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "billing_address_text",
+   "fieldtype": "Small Text",
+   "label": "Billing Address Text"
+  },
+  {
+   "fieldname": "billing_address_name",
+   "fieldtype": "Link",
+   "label": "Billing Address",
+   "options": "Address"
+  },
+  {
+   "default": "Guatemala",
+   "fieldname": "country_of_issue",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fetch_from": "supplier.tax_id",
+   "fieldname": "supplier_tax_id",
+   "fieldtype": "Data",
+   "label": "Supplier Tax ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "export_resolution_number",
+   "fieldtype": "Link",
+   "label": "Resolution Number",
+   "options": "Tax Authority Resolution"
+  },
+  {
+   "fetch_from": "export_resolution_number.resolution_date",
+   "fieldname": "export_resolution_date",
+   "fieldtype": "Date",
+   "label": "Resolution Date"
+  },
+  {
+   "fieldname": "cadi_resolution_number",
+   "fieldtype": "Link",
+   "options": "Tax Authority Resolution"
+  },
+  {
+   "fetch_from": "cadi_resolution_number.resolution_date",
+   "fieldname": "cadi_resolution_date",
+   "fieldtype": "Data",
+   "label": "CADI Authorization Resolution Date"
   }
  ],
- "modified": "2020-07-28 22:06:55.027032",
+ "modified": "2020-07-28 23:13:10.291710",
  "modified_by": "Administrator",
  "module": "Factura Electronica",
  "name": "Consumable Acquisition Record",
