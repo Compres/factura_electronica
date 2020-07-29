@@ -178,7 +178,7 @@
    "label": "CADI Authorization Resolution Date"
   }
  ],
- "modified": "2020-07-28 23:16:44.489455",
+ "modified": "2020-07-28 23:18:57.356054",
  "modified_by": "Administrator",
  "module": "Factura Electronica",
  "name": "Consumable Acquisition Record",
@@ -211,6 +211,18 @@
    "print": 1,
    "read": 1,
    "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
    "share": 1,
    "write": 1
   }
