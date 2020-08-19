@@ -1,7 +1,7 @@
-**es-GT:**
+**es-CO:**
 ## App Factura Electronica
 
-Aplicacion para la generacion de facturas electronicas en Guatemala, basado en el modulo de Cuentas y Almacén de ERPNext y el DocType de Factura de Ventas.
+Aplicacion para la generacion de facturas electronicas en Colombia, basado en el modulo de Cuentas y Almacén de ERPNext y el DocType de Factura de Ventas.
 
 Requiere de un servicio contratado por separado para conectar a su API.
 
