@@ -41,20 +41,20 @@ frappe.query_reports["VAT Payable and Receivable Conciliation"] = {
         },
         {
             fieldname: "month",
-            label: __("Month"),
+            label: __("Mes"),
             fieldtype: "Select",
             default: get_start_yr_mo().month,
-            options: [__("January"), __("February"), __("March"), __("April"),
-            __("May"), __("June"), __("July"), __("August"), __("September"), __("October"),
-            __("November"), __("December")],
+            options: [__("Enero"), __("Febrero"), __("Marzo"), __("Abril"),
+            __("Mayo"), __("Junio"), __("Julio"), __("Agosto"), __("Septiembre"), __("Octobre"),
+            __("Noviembre"), __("Diciembre")],
             reqd: 1,
         },
         {
             fieldname: "year",
-            label: __("Year"),
+            label: __("Año"),
             default: get_start_yr_mo().year,
             fieldtype: "Link",
-            options: "Fiscal Year",
+            options: "Año Fiscal",
             reqd: 1,
         },
         {
@@ -82,9 +82,9 @@ frappe.query_reports["VAT Payable and Receivable Conciliation"] = {
         },
     ],
     onload: function (report) {
-        report.page.add_inner_button(__("Generate Journal Entry"), function () {
-            // window.open("/api/method/factura_electronica.api_erp.download_asl_files");
-            window.open("sihaysistema.com", "_blank");
+        report.page.add_inner_button(__("Generar entrada diaria"), function () {
+             window.open("/api/method/factura_electronica.api_erp.download_asl_files");
+           // window.open("/", "_blank");
         });
     },
 };

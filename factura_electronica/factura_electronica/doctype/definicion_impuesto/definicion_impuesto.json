@@ -1,6 +1,6 @@
 {
- "autoname": "TAX-RETENTION.########",
- "creation": "2020-07-14 00:47:33.090840",
+ "autoname": "DECLAR-IMP-.########",
+ "creation": "2020-08-19 16:26:51.408883",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -14,8 +14,10 @@
   "import_invoices",
   "section_break",
   "journal_entry",
+  "es_servicio",
   "purchase_invoice",
   "sales_invoice",
+  "factura_servicio",
   "invoice_date",
   "grand_total",
   "currency",
@@ -66,65 +68,67 @@
   {
    "fieldname": "import_invoices",
    "fieldtype": "Button",
-   "label": "Import Invoices"
+   "label": "Entrada Facturas"
   },
   {
    "collapsible": 1,
    "fieldname": "section_break",
    "fieldtype": "Section Break",
-   "label": "Invoices and Journal Entry"
+   "label": "Entrada de Facturas"
   },
   {
    "fieldname": "journal_entry",
    "fieldtype": "Link",
    "hidden": 1,
-   "label": "Journal Entry",
+   "label": "Entrada diaria",
    "options": "Journal Entry",
    "read_only": 1
   },
   {
    "fieldname": "purchase_invoice",
    "fieldtype": "Link",
-   "label": "Purchase Invoice",
+   "label": "Factura de Compra",
    "options": "Purchase Invoice",
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.es_servicio === 'Factura Producto'",
+   "description": "Se debe controlar que si es marcado factura por servicio se debe ocultar y mostrar la factura por servicio",
    "fieldname": "sales_invoice",
    "fieldtype": "Link",
-   "label": "Sales Invoice",
+   "label": "Factura de Ventas",
    "options": "Sales Invoice"
   },
   {
    "fieldname": "invoice_date",
    "fieldtype": "Date",
-   "label": "Invoice Date"
+   "label": "Fecha factura"
   },
   {
    "fieldname": "grand_total",
    "fieldtype": "Currency",
-   "label": "Grand Total"
+   "label": "Total"
   },
   {
    "fieldname": "currency",
    "fieldtype": "Link",
-   "label": "Currency",
+   "label": "Divisa",
    "options": "Currency"
   },
   {
    "fieldname": "retention_amount",
    "fieldtype": "Currency",
-   "label": "Retention Amount"
+   "label": "Monto de retenci\u00f3n"
   },
   {
    "fieldname": "retention_confirmation",
    "fieldtype": "Data",
-   "label": "Retention Confirmation"
+   "label": "Confirmar Impuestos"
   },
   {
    "fieldname": "retention_status",
    "fieldtype": "Data",
-   "label": "Retention Status"
+   "label": "Estado impuesto"
   },
   {
    "fieldname": "retention_image",
@@ -135,13 +139,27 @@
   {
    "fieldname": "attach_retention_image",
    "fieldtype": "Attach Image",
-   "label": "Attach Retention Image"
+   "label": "Adjuntar Imagen"
+  },
+  {
+   "default": "Factura Producto",
+   "fieldname": "es_servicio",
+   "fieldtype": "Select",
+   "label": "Factura Servicio",
+   "options": "Factura Producto\nFactura Servicio"
+  },
+  {
+   "depends_on": "eval:doc.es_servicio === 'Factura Servicio'",
+   "fieldname": "factura_servicio",
+   "fieldtype": "Link",
+   "label": "Factura Servicio",
+   "options": "Factura Servicio"
   }
  ],
- "modified": "2020-08-19 16:24:04.520789",
+ "modified": "2020-08-19 19:57:51.621677",
  "modified_by": "Administrator",
  "module": "Factura Electronica",
- "name": "Tax Retention Guatemala",
+ "name": "Definicion Impuesto",
  "owner": "Administrator",
  "permissions": [
   {

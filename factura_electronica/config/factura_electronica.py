@@ -62,8 +62,8 @@ def get_data():
                 },
                 {
                     "type": "doctype",
-                    "name": "Tax Retention Guatemala",
-                    "description": _("Tax Retention Guatemala"),
+                    "name": "Definicion Impuesto",
+                    "description": _("Definición Impuesto"),
                     "onboard": 1
                 },
                 {
